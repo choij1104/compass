@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1720">
+<title>Compass — Private Recognition & Record</title>
+<style>
+  :root{
+    --ink:#0f1720; --ink-soft:#1c2733; --paper:#f6f4ef; --paper-2:#eceae3;
+    --line:#d9d5cb; --line-2:#c3beb2; --muted:#5d6570; --muted-2:#8a8f97;
+    --sea:#2f6d6a; --sea-deep:#1f4d4b; --sea-soft:#e2ecea;
+    --amber:#b06a34; --amber-soft:#f2e5d7; --sand:#efe9dc;
+    --alarm:#8a3324; --alarm-soft:#f3e0da; --white:#ffffff;
+    --shadow:0 1px 2px rgba(15,23,32,.06),0 8px 28px rgba(15,23,32,.08);
+    --shadow-lg:0 24px 60px rgba(15,23,32,.22);
+    --r:14px; --r-lg:22px;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans); background:var(--paper); color:var(--ink);
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; letter-spacing:-.01em; margin:0}
+  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
+  input,textarea,select{font-family:inherit; font-size:16px}
+  .screen{display:none; min-height:100vh; animation:fade .35s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen,.card,*{animation:none!important;transition:none!important}}
+  .wrap{max-width:680px; margin:0 auto; padding:0 18px}
+
+  /* ---------- Lock ---------- */
+  #lock{background:var(--ink); color:var(--paper); display:none; min-height:100vh}
+  #lock.active{display:flex; flex-direction:column; justify-content:center}
+  .lock-inner{max-width:360px;margin:0 auto;padding:32px 24px;text-align:center;width:100%}
+  .compass-mark{width:70px;height:70px;margin:0 auto 22px;position:relative}
+  .compass-mark svg{width:100%;height:100%}
+  #lock h1{font-size:26px;color:var(--paper)}
+  #lock p{color:#a9b2bc;font-size:14.5px;margin:8px 0 26px}
+  .pin-dots{display:flex;gap:14px;justify-content:center;margin:8px 0 26px;min-height:18px}
+  .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid #6b7a86;transition:.15s}
+  .pin-dot.on{background:var(--sea);border-color:var(--sea);transform:scale(1.08)}
+  .pin-dot.err{border-color:var(--alarm);background:var(--alarm)}
+  .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:260px;margin:0 auto}
+  .key{aspect-ratio:1.4;border-radius:14px;background:#1c2733;color:var(--paper);font-size:22px;
+    font-weight:500;display:flex;align-items:center;justify-content:center;border:1px solid #2a3948;transition:.1s}
+  .key:active{background:var(--sea-deep);transform:scale(.96)}
+  .key.fn{font-size:13px;color:#a9b2bc;background:transparent;border-color:transparent}
+  .lock-note{margin-top:24px;font-size:12px;color:#7d8894;line-height:1.5}
+  .lock-acro{margin:4px 0 22px;font-size:11px;letter-spacing:.03em;color:#8b96a1;line-height:1.7}
+  .lock-acro b{color:#cdd6de;font-weight:700}
+
+  /* ---------- Top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(246,244,239,.86);
+    backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);
+    border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:680px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+  .tb-back{font-size:22px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+    border-radius:10px;color:var(--sea-deep)}
+  .tb-back:active{background:var(--sea-soft)}
+  .tb-title{font-family:var(--serif);font-size:18px;font-weight:600}
+  .tb-spacer{flex:1}
+  .tb-lock{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:5px;
+    padding:6px 11px;border:1px solid var(--line);border-radius:999px}
+  .tb-lock:active{background:var(--paper-2)}
+
+  /* ---------- Home ---------- */
+  .home-hero{padding:30px 0 8px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sea);font-weight:700}
+  .home-hero h1{font-size:30px;line-height:1.12;margin:12px 0 10px}
+  .home-hero p{color:var(--muted);font-size:15px;max-width:34em}
+  .home-hero .safety{margin-top:16px;background:var(--sea-soft);border:1px solid #cfe0dd;border-radius:var(--r);
+    padding:13px 15px;font-size:13.5px;color:var(--sea-deep)}
+  .home-hero .safety b{font-weight:700}
+
+  .tiles{display:grid;gap:13px;margin:22px 0 10px}
+  .tile{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
+    box-shadow:var(--shadow);display:flex;gap:16px;align-items:flex-start;transition:.14s;text-align:left;width:100%}
+  .tile:active{transform:scale(.99);border-color:var(--line-2)}
+  .tile-ico{width:46px;height:46px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center}
+  .tile-ico svg{width:24px;height:24px}
+  .tile h3{font-size:18px;margin-bottom:3px}
+  .tile p{font-size:13.5px;color:var(--muted);margin:0}
+  .tile .tag{margin-top:9px;font-size:11.5px;color:var(--sea-deep);background:var(--sea-soft);
+    display:inline-block;padding:3px 9px;border-radius:999px;font-weight:600}
+  .ico-sea{background:var(--sea-soft);color:var(--sea-deep)}
+  .ico-amber{background:var(--amber-soft);color:var(--amber)}
+  .ico-sand{background:var(--sand);color:#7a6a4d}
+  .ico-ink{background:var(--paper-2);color:var(--ink-soft)}
+
+  .pattern-alert{background:var(--amber-soft);border:1px solid #e4c9a8;border-radius:var(--r);
+    padding:15px 16px;margin:4px 0 2px;display:flex;gap:12px;align-items:flex-start}
+  .pattern-alert svg{width:22px;height:22px;flex:none;color:var(--amber);margin-top:1px}
+  .pattern-alert h4{font-family:var(--serif);font-size:15.5px;margin:0 0 3px}
+  .pattern-alert p{font-size:13px;color:#7a5a34;margin:0}
+  .pattern-alert button{margin-top:9px;font-size:12.5px;color:var(--amber);font-weight:700;text-decoration:underline}
+
+  /* ---------- Generic content ---------- */
+  .content{padding:22px 0 40px}
+  .lede{font-size:16px;color:var(--ink-soft);margin:0 0 20px;line-height:1.55}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:18px;
+    margin-bottom:14px;box-shadow:var(--shadow)}
+  .card h3{font-size:17px;margin-bottom:7px}
+  .card p{font-size:14px;color:var(--muted);margin:0 0 6px}
+  .section-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);
+    font-weight:700;margin:26px 0 12px}
+
+  .note{background:var(--sea-soft);border-left:3px solid var(--sea);border-radius:8px;padding:13px 15px;
+    font-size:13.5px;color:var(--sea-deep);margin:14px 0}
+  .note.amber{background:var(--amber-soft);border-color:var(--amber);color:#7a5a34}
+  .note.alarm{background:var(--alarm-soft);border-color:var(--alarm);color:var(--alarm)}
+  .note b{font-weight:700}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--sea);
+    color:#fff;font-weight:600;font-size:15px;padding:14px 20px;border-radius:12px;width:100%;
+    box-shadow:0 6px 16px rgba(47,109,106,.24);transition:.12s}
+  .btn:active{transform:translateY(1px);background:var(--sea-deep)}
+  .btn.ghost{background:transparent;color:var(--sea-deep);border:1.5px solid var(--line-2);box-shadow:none}
+  .btn.ghost:active{background:var(--paper-2)}
+  .btn.amber{background:var(--amber);box-shadow:0 6px 16px rgba(176,106,52,.24)}
+  .btn.small{width:auto;font-size:13.5px;padding:10px 16px}
+  .btn.danger{background:var(--alarm)}
+  .btn-row{display:flex;gap:10px;margin-top:14px}
+  .btn-row .btn{width:auto;flex:1}
+
+  /* ---------- Recognition flow ---------- */
+  .rq{padding:24px 0 30px}
+  .rq-progress{height:4px;background:var(--paper-2);border-radius:99px;overflow:hidden;margin-bottom:26px}
+  .rq-progress span{display:block;height:100%;background:var(--sea);transition:width .4s ease}
+  .rq h2{font-size:23px;line-height:1.22;margin-bottom:8px}
+  .rq .sub{color:var(--muted);font-size:14px;margin-bottom:22px}
+  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);
+    border-radius:13px;padding:15px 16px;margin-bottom:10px;font-size:15px;transition:.12s;color:var(--ink)}
+  .opt:active{transform:scale(.99)}
+  .opt.sel{border-color:var(--sea);background:var(--sea-soft)}
+  .opt .oh{font-weight:600;font-size:15px;display:block}
+  .opt .os{font-size:13px;color:var(--muted);margin-top:3px;display:block}
+  .opt.sel .os{color:var(--sea-deep)}
+  .multi-hint{font-size:12.5px;color:var(--muted-2);margin:-4px 0 14px}
+
+  /* ---------- Result ---------- */
+  .result-badge{border-radius:var(--r-lg);padding:22px;color:#fff;margin-bottom:18px;box-shadow:var(--shadow)}
+  .result-badge.watch{background:linear-gradient(135deg,#2f6d6a,#1f4d4b)}
+  .result-badge.concern{background:linear-gradient(135deg,#b06a34,#8a4f24)}
+  .result-badge.strong{background:linear-gradient(135deg,#8a3324,#6d2519)}
+  .result-badge .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:700}
+  .result-badge h2{color:#fff;font-size:24px;margin:8px 0 6px}
+  .result-badge p{color:rgba(255,255,255,.92);font-size:14px;margin:0}
+  .flag-list{list-style:none;padding:0;margin:0}
+  .flag-list li{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+  .flag-list li:last-child{border-bottom:none}
+  .flag-list .fi{width:26px;height:26px;flex:none;border-radius:8px;background:var(--amber-soft);
+    color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+  .flag-list .ft{font-size:14px}
+  .flag-list .ft b{font-weight:600}
+
+  /* ---------- Journal / timeline ---------- */
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
+  .field .hint{font-size:12px;color:var(--muted-2);font-weight:400;margin-top:2px}
+  .field input[type=text],.field input[type=date],.field input[type=time],.field textarea,.field select{
+    width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--white);
+    color:var(--ink);transition:.12s}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--sea);
+    box-shadow:0 0 0 3px var(--sea-soft)}
+  .field textarea{min-height:120px;resize:vertical;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;font-size:13px;
+    background:var(--white);transition:.12s;color:var(--ink)}
+  .chip:active{transform:scale(.97)}
+  .chip.on{background:var(--sea);border-color:var(--sea);color:#fff}
+  .body-map{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  .entry{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;
+    margin-bottom:12px;box-shadow:var(--shadow)}
+  .entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .entry-date{font-size:12.5px;color:var(--muted);font-weight:600}
+  .entry-cat{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .cat-sh{background:var(--alarm-soft);color:var(--alarm)}
+  .cat-ha{background:var(--amber-soft);color:var(--amber)}
+  .cat-di{background:var(--sea-soft);color:var(--sea-deep)}
+  .cat-re{background:#e7e2f0;color:#5b4b8a}
+  .cat-ot{background:var(--paper-2);color:var(--muted)}
+  .entry h4{font-family:var(--sans);font-size:15px;font-weight:600;margin:0 0 4px}
+  .entry .ebody{font-size:13.5px;color:var(--ink-soft);white-space:pre-wrap;word-break:break-word}
+  .entry .emeta{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+  .entry .emeta span{font-size:11.5px;color:var(--muted);background:var(--paper-2);padding:2px 8px;border-radius:6px}
+  .entry-actions{display:flex;gap:8px;margin-top:11px}
+  .entry-actions button{font-size:12.5px;color:var(--muted);padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+  .entry-actions button:active{background:var(--paper-2)}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty svg{width:44px;height:44px;color:var(--line-2);margin-bottom:12px}
+  .empty h3{font-size:17px;color:var(--ink-soft);margin-bottom:6px}
+  .empty p{font-size:13.5px;max-width:26em;margin:0 auto}
+
+  .filter-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 -2px;-webkit-overflow-scrolling:touch}
+  .filter-row .chip{white-space:nowrap;flex:none}
+
+  /* ---------- Reporting ---------- */
+  .path{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow)}
+  .path-head{padding:16px 18px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--line)}
+  .path-head .pico{width:40px;height:40px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center}
+  .path-head h3{font-size:16.5px;margin:0}
+  .path-head .pw{font-size:12px;color:var(--muted);margin-top:1px}
+  .path-body{padding:16px 18px}
+  .path-body p{font-size:13.5px;color:var(--ink-soft);margin:0 0 10px}
+  .path-body ul{margin:0 0 6px;padding-left:18px}
+  .path-body li{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
+  .kv{display:flex;gap:8px;font-size:13px;padding:7px 0;border-top:1px dashed var(--line)}
+  .kv .k{font-weight:600;color:var(--ink-soft);min-width:96px}
+  .kv .v{color:var(--muted)}
+  details.faq{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;background:var(--white);overflow:hidden}
+  details.faq summary{padding:14px 15px;font-size:14px;font-weight:600;list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  details.faq summary::-webkit-details-marker{display:none}
+  details.faq summary::after{content:"+";color:var(--sea);font-size:20px;font-weight:400}
+  details.faq[open] summary::after{content:"–"}
+  details.faq .fa-body{padding:0 15px 15px;font-size:13.5px;color:var(--muted);line-height:1.55}
+  details.faq .fa-body b{color:var(--ink-soft);font-weight:600}
+
+  .hot{display:flex;gap:12px;align-items:center;background:var(--white);border:1px solid var(--line);
+    border-radius:var(--r);padding:14px 16px;margin-bottom:11px;box-shadow:var(--shadow)}
+  .hot .hi{width:40px;height:40px;flex:none;border-radius:11px;background:var(--alarm-soft);color:var(--alarm);
+    display:flex;align-items:center;justify-content:center}
+  .hot h4{font-size:15px;margin:0}
+  .hot p{font-size:12.5px;color:var(--muted);margin:1px 0 0}
+  .hot .num{margin-left:auto;font-weight:700;color:var(--sea-deep);font-size:14px;white-space:nowrap}
+
+  /* ---------- Settings ---------- */
+  .set-row{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+  .set-row:last-child{border-bottom:none}
+  .set-row .sl{font-size:14.5px;font-weight:500}
+  .set-row .sd{font-size:12.5px;color:var(--muted);margin-top:2px;max-width:22em}
+  .toggle{width:48px;height:28px;border-radius:999px;background:var(--line-2);position:relative;transition:.16s;flex:none}
+  .toggle.on{background:var(--sea)}
+  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+    background:#fff;transition:.16s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on::after{transform:translateX(20px)}
+
+  /* ---------- Modal / toast ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,32,.5);z-index:80;display:none;
+    align-items:flex-end;justify-content:center;padding:0}
+  .modal-bg.on{display:flex;animation:fade .2s}
+  .modal{background:var(--paper);width:100%;max-width:680px;border-radius:22px 22px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+    box-shadow:var(--shadow-lg);animation:slideup .28s ease}
+  @keyframes slideup{from{transform:translateY(30px)}to{transform:none}}
+  .modal h3{font-size:19px;margin-bottom:8px}
+  .modal p{font-size:14px;color:var(--muted);margin:0 0 18px}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:500;
+    z-index:90;transition:.28s;pointer-events:none;box-shadow:var(--shadow-lg)}
+  .toast.on{opacity:1;transform:translateX(-50%)}
+
+  .footer-note{text-align:center;font-size:11.5px;color:var(--muted-2);padding:24px 20px 34px;line-height:1.6}
+  .footer-note b{color:var(--muted)}
+  .quick-exit{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;
+    background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:11px 15px;border-radius:999px;
+    box-shadow:var(--shadow-lg);display:none;align-items:center;gap:6px}
+  .quick-exit.show{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ============ LOCK ============ -->
+<div id="lock" class="active">
+  <div class="lock-inner">
+    <div class="compass-mark">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="44" stroke="#2f6d6a" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="3.4" fill="#e2ecea"/>
+        <path d="M50 12 L57 47 L50 50 L43 47 Z" fill="#e2ecea"/>
+        <path d="M50 88 L43 53 L50 50 L57 53 Z" fill="#5d6570"/>
+      </svg>
+    </div>
+    <h1 id="lockTitle">Compass</h1>
+    <p id="lockSub">Enter your PIN to open</p>
+    <div class="lock-acro" id="lockAcro"><b>C</b>ourage · <b>O</b>wnership · <b>M</b>emory · <b>P</b>rotection · <b>A</b>nd <b>S</b>elf-worth <b>S</b>upport</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="keys" id="keys"></div>
+    <div class="lock-note" id="lockNote">Everything you enter stays on this device only. Nothing is sent anywhere.</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" style="display:none">
+
+  <div class="topbar" id="topbar" style="display:none">
+    <div class="topbar-in">
+      <button class="tb-back" id="tbBack" onclick="goBack()" style="display:none">‹</button>
+      <div class="tb-title" id="tbTitle">Compass</div>
+      <div class="tb-spacer"></div>
+      <button class="tb-lock" onclick="lockNow()">🔒 Lock</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="wrap">
+      <div class="home-hero">
+        <div class="eyebrow">Private · On this device</div>
+        <h1>You don't have to be sure to start paying attention.</h1>
+        <p>Sometimes something feels off long before you can name it. This is a quiet place to notice, record, and — when you're ready — understand what's happening and what your options are.</p>
+        <div class="safety"><b>If you're in immediate danger, call 911.</b> For 24/7 confidential support, the DoD Safe Helpline is 877-995-5247.</div>
+      </div>
+
+      <div id="patternSlot"></div>
+
+      <div class="tiles">
+        <button class="tile" onclick="startRecognition()">
+          <div class="tile-ico ico-sea">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3.5-3.5"/></svg>
+          </div>
+          <div>
+            <h3>Was that okay?</h3>
+            <p>Not sure if something crossed a line? Answer a few plain questions — no judgment, no labels. You describe what happened; it helps you see it.</p>
+            <span class="tag">Start here if unsure</span>
+          </div>
+        </button>
+
+        <button class="tile" onclick="show('s-journal')">
+          <div class="tile-ico ico-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16a1 1 0 0 0 1 1h15"/><path d="M8 7h9M8 11h9M8 15h6"/></svg>
+          </div>
+          <div>
+            <h3>Record & timeline</h3>
+            <p>Keep a dated record of moments, words, and how you felt. One entry means little; a timeline can reveal a pattern.</p>
+            <span class="tag" id="entryCountTag">No entries yet</span>
+          </div>
+        </button>
+
+        <button class="tile" onclick="show('s-learn')">
+          <div class="tile-ico ico-sand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/></svg>
+          </div>
+          <div>
+            <h3>Know the signs</h3>
+            <p>How grooming, boundary-testing, and exclusion actually work — so an approach that felt "normal" becomes recognizable.</p>
+          </div>
+        </button>
+
+        <button class="tile" onclick="show('s-fear')">
+          <div class="tile-ico ico-ink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg>
+          </div>
+          <div>
+            <h3>Afraid to speak up?</h3>
+            <p>Worried it could cost you your career, or that you'd be doing it alone? That fear is real — and it's worth reading this before you decide anything.</p>
+            <span class="tag">You won't be doing it alone</span>
+          </div>
+        </button>
+
+        <button class="tile" onclick="show('s-report')">
+          <div class="tile-ico ico-ink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.5V4z"/><path d="M8 9h8M8 12h5"/></svg>
+          </div>
+          <div>
+            <h3>Your options</h3>
+            <p>Reporting pathways for the U.S. Armed Forces — SAPR, EO, and IG — in plain language, plus what each one means for you.</p>
+          </div>
+        </button>
+
+        <button class="tile" onclick="show('s-recover')">
+          <div class="tile-ico ico-sea">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
+          </div>
+          <div>
+            <h3>Recovery & staying yourself</h3>
+            <p>Reporting deals with what was done to you. This is about not letting it harden you — so the person you become is still someone you'd want to be.</p>
+          </div>
+        </button>
+      </div>
+
+      <div class="footer-note">
+        <b>Compass — Courage, Ownership, Memory, Protection, and Self-worth Support.</b> Everything stays on this device. A personal record here supports your memory — it does not replace an official report. To formally preserve evidence, a SARC can guide that process.
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOGNITION -->
+  <div class="screen" id="s-recog">
+    <div class="wrap"><div class="rq" id="rqHost"></div></div>
+  </div>
+
+  <!-- JOURNAL LIST -->
+  <div class="screen" id="s-journal">
+    <div class="wrap">
+      <div class="content">
+        <p class="lede">Facts don't require certainty. Write what happened and how your body felt — you can make sense of it later.</p>
+        <button class="btn" onclick="newEntry()">+ New record</button>
+        <div class="filter-row" id="filterRow"></div>
+        <div id="entryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTRY EDITOR -->
+  <div class="screen" id="s-entry">
+    <div class="wrap"><div class="content" id="entryHost"></div></div>
+  </div>
+
+  <!-- LEARN -->
+  <div class="screen" id="s-learn">
+    <div class="wrap"><div class="content" id="learnHost"></div></div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="screen" id="s-report">
+    <div class="wrap"><div class="content" id="reportHost"></div></div>
+  </div>
+
+  <!-- FEAR / BEFORE YOU SPEAK -->
+  <div class="screen" id="s-fear">
+    <div class="wrap"><div class="content" id="fearHost"></div></div>
+  </div>
+
+  <!-- RECOVERY -->
+  <div class="screen" id="s-recover">
+    <div class="wrap"><div class="content" id="recoverHost"></div></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="s-settings">
+    <div class="wrap"><div class="content" id="settingsHost"></div></div>
+  </div>
+
+</div>
+
+<button class="quick-exit" id="quickExit" onclick="quickExit()">Quick exit ✕</button>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   COMPASS — offline, single-file. All data in localStorage.
+   No network calls anywhere. PIN gate + optional quick-exit.
+   ========================================================= */
+const DB_KEY='compass.v1';
+let db=load();
+let nav=['s-home'];
+let pinBuf='', pinMode='enter', pinTmp='';
+
+function load(){
+  try{const r=localStorage.getItem(DB_KEY); if(r) return JSON.parse(r);}catch(e){}
+  return {pin:null, entries:[], recog:[], settings:{quickExit:true, decoy:false}};
+}
+function save(){ try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){ toast('Could not save — storage may be full'); } }
+
+/* ---------- PIN / LOCK ---------- */
+function buildKeys(){
+  const host=document.getElementById('keys'); host.innerHTML='';
+  const layout=[1,2,3,4,5,6,7,8,9,'x',0,'ok'];
+  layout.forEach(k=>{
+    const b=document.createElement('button');
+    if(k==='x'){ b.className='key fn'; b.textContent='⌫'; b.onclick=()=>{pinBuf=pinBuf.slice(0,-1);drawDots();}; }
+    else if(k==='ok'){ b.className='key fn'; b.textContent='OK'; b.onclick=submitPin; }
+    else { b.className='key'; b.textContent=k; b.onclick=()=>{ if(pinBuf.length<8){pinBuf+=k;drawDots(); if(pinBuf.length>=4&&db.pin&&pinMode==='enter')setTimeout(submitPin,120);} }; }
+    host.appendChild(b);
+  });
+}
+function drawDots(err){
+  const d=document.getElementById('pinDots'); d.innerHTML='';
+  const n=Math.max(pinBuf.length,4);
+  for(let i=0;i<n;i++){const s=document.createElement('span');s.className='pin-dot'+(i<pinBuf.length?' on':'')+(err?' err':'');d.appendChild(s);}
+}
+function submitPin(){
+  if(pinMode==='set'){
+    if(pinBuf.length<4){toast('Use at least 4 digits');return;}
+    pinTmp=pinBuf; pinBuf=''; pinMode='confirm';
+    document.getElementById('lockTitle').textContent='Confirm PIN';
+    document.getElementById('lockSub').textContent='Enter it once more';
+    drawDots(); return;
+  }
+  if(pinMode==='confirm'){
+    if(pinBuf===pinTmp){ db.pin=pinBuf; save(); pinBuf=''; openApp(); }
+    else { drawDots(true); toast("PINs didn't match — start over"); pinBuf='';pinTmp='';pinMode='set';
+      document.getElementById('lockTitle').textContent='Set a PIN';
+      document.getElementById('lockSub').textContent='Choose 4–8 digits';
+      setTimeout(drawDots,500); }
+    return;
+  }
+  // enter mode
+  if(pinBuf===db.pin){ pinBuf=''; openApp(); }
+  else { drawDots(true); const d=document.getElementById('pinDots'); navigator.vibrate&&navigator.vibrate(120);
+    setTimeout(()=>{pinBuf='';drawDots();},450); }
+}
+function lockNow(){
+  document.getElementById('app').style.display='none';
+  const l=document.getElementById('lock'); l.classList.add('active');
+  document.getElementById('quickExit').classList.remove('show');
+  pinBuf=''; pinMode='enter';
+  document.getElementById('lockTitle').textContent='Compass';
+  document.getElementById('lockSub').textContent='Enter your PIN to open';
+  drawDots();
+}
+function openApp(){
+  document.getElementById('lock').classList.remove('active');
+  document.getElementById('app').style.display='block';
+  document.getElementById('topbar').style.display='block';
+  if(db.settings.quickExit) document.getElementById('quickExit').classList.add('show');
+  refreshHome();
+}
+function quickExit(){ location.replace('https://www.weather.gov/'); }
+
+/* ---------- NAV ---------- */
+function show(id, push=true){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(push && nav[nav.length-1]!==id) nav.push(id);
+  const back=document.getElementById('tbBack');
+  back.style.display = id==='s-home' ? 'none':'flex';
+  const titles={'s-home':'Compass','s-recog':'Was that okay?','s-journal':'Record & timeline',
+    's-entry':'Record','s-learn':'Know the signs','s-report':'Your options','s-settings':'Settings',
+    's-fear':'Afraid to speak up?','s-recover':'Recovery & staying yourself'};
+  document.getElementById('tbTitle').textContent=titles[id]||'Compass';
+  window.scrollTo(0,0);
+  if(id==='s-journal') renderJournal();
+  if(id==='s-learn') renderLearn();
+  if(id==='s-report') renderReport();
+  if(id==='s-fear') renderFear();
+  if(id==='s-recover') renderRecover();
+  if(id==='s-settings') renderSettings();
+}
+function goBack(){ if(nav.length>1){nav.pop(); show(nav[nav.length-1],false);} }
+function goHome(){ nav=['s-home']; show('s-home',false); }
+
+/* ---------- HOME ---------- */
+function refreshHome(){
+  const n=db.entries.length;
+  document.getElementById('entryCountTag').textContent = n===0?'No entries yet':(n+' entr'+(n===1?'y':'ies')+' recorded');
+  renderPatternAlert();
+}
+function renderPatternAlert(){
+  const slot=document.getElementById('patternSlot'); slot.innerHTML='';
+  const p=detectPatterns();
+  if(!p) return;
+  const div=document.createElement('div'); div.className='pattern-alert';
+  div.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <div><h4>${p.title}</h4><p>${p.body}</p><button onclick="show('s-journal')">Review the timeline →</button></div>`;
+  slot.appendChild(div);
+}
+/* pattern logic: repetition by person, or by category, or escalation over time */
+function detectPatterns(){
+  const e=db.entries; if(e.length<2) return null;
+  const byPerson={}, byCat={};
+  e.forEach(x=>{ if(x.person){const k=x.person.trim().toLowerCase(); if(k) byPerson[k]=(byPerson[k]||0)+1;} byCat[x.cat]=(byCat[x.cat]||0)+1; });
+  for(const k in byPerson){ if(byPerson[k]>=3){
+    const name=e.find(x=>x.person&&x.person.trim().toLowerCase()===k).person;
+    return {title:'A repeating pattern', body:`The same person — ${escapeHtml(name)} — appears in ${byPerson[k]} of your records. Repetition is often what separates a one-time misunderstanding from a pattern worth acting on.`};
+  }}
+  for(const c in byCat){ if(byCat[c]>=3 && c!=='ot'){
+    const label={sh:'possible sexual misconduct',ha:'harassment or bullying',di:'discrimination',re:'possible reprisal'}[c]||'this type';
+    return {title:'This keeps happening', body:`You've recorded ${byCat[c]} moments related to ${label}. When something recurs, it's less likely to be "just you being sensitive."`};
+  }}
+  return null;
+}
+
+/* =========================================================
+   RECOGNITION FLOW — describe, don't judge.
+   Scores signals silently; never tells user "you are a victim."
+   ========================================================= */
+const RQ=[
+  {id:'setting', q:"First — what kind of moment are we looking at?", sub:"Pick whatever fits best. There are no wrong answers.",
+   opts:[
+     {v:'oneword',h:"Something someone said",s:"A comment, a joke, a remark that stuck with you"},
+     {v:'touch',h:"Physical — contact or closeness",s:"Being touched, cornered, or crowded"},
+     {v:'exclude',h:"Being left out or shut down",s:"Ignored, excluded, undermined, talked over"},
+     {v:'power',h:"Someone using their position",s:"A senior, supervisor, or instructor over you"},
+     {v:'unsure',h:"I honestly can't categorize it",s:"It just felt off"},
+   ]},
+  {id:'body', q:"When it happened — or when you think back on it — what did your body do?", sub:"Your body often registers a problem before your mind puts words to it. Choose any that apply.", multi:true,
+   opts:[
+     {v:'froze',h:"I froze or went blank",s:"",w:2},
+     {v:'sick',h:"My stomach dropped / felt sick",s:"",w:2},
+     {v:'small',h:"I wanted to disappear or get away",s:"",w:2},
+     {v:'replay',h:"I keep replaying it afterward",s:"",w:2},
+     {v:'doubt',h:"I started doubting my own read of it",s:"",w:1},
+     {v:'none',h:"Nothing much — I'm just not sure",s:"",w:0},
+   ]},
+  {id:'delay', q:"Did it take you a while to feel that something was wrong?", sub:"This is one of the most common — and most misunderstood — experiences. There's no wrong answer.",
+   opts:[
+     {v:'immediate',h:"No, I knew right away",s:"",w:0},
+     {v:'hours',h:"It hit me hours or days later",s:"",w:1},
+     {v:'now',h:"I'm only realizing it now",s:"",w:1},
+   ]},
+  {id:'signals', q:"Do any of these describe how the person behaved?", sub:"These are patterns specialists watch for. Select any you recognize — even loosely.", multi:true,
+   opts:[
+     {v:'private',h:"Kept it just between us / asked me not to tell",s:"",w:2},
+     {v:'test',h:"Pushed a little further each time",s:"Testing where my line was",w:2},
+     {v:'favor',h:"Offered favors, then expected something back",s:"",w:2},
+     {v:'isolate',h:"Tried to get me alone or away from others",s:"",w:2},
+     {v:'deny',h:"Made me feel like I imagined it",s:"'You're too sensitive', 'that never happened'",w:2},
+     {v:'threat',h:"Hinted it could affect my career or standing",s:"",w:3},
+     {v:'none',h:"None of these",s:"",w:0},
+   ]},
+  {id:'position', q:"Where does this person stand in relation to you?", sub:"Power difference changes what's at stake.",
+   opts:[
+     {v:'over',h:"Above me — rates me, leads me, or teaches me",s:"",w:2},
+     {v:'peer',h:"A peer",s:"",w:0},
+     {v:'under',h:"Below me",s:"",w:0},
+     {v:'other',h:"Not sure / someone else",s:"",w:0},
+   ]},
+];
+let rqState={i:0, ans:{}};
+function startRecognition(){ rqState={i:0, ans:{}}; show('s-recog'); renderRQ(); }
+function renderRQ(){
+  const host=document.getElementById('rqHost');
+  const step=RQ[rqState.i];
+  const pct=Math.round((rqState.i)/(RQ.length)*100);
+  if(rqState.i>=RQ.length){ return renderRQResult(); }
+  const sel=rqState.ans[step.id]||(step.multi?[]:null);
+  host.innerHTML=`
+    <div class="rq-progress"><span style="width:${pct}%"></span></div>
+    <h2>${step.q}</h2>
+    <div class="sub">${step.sub}</div>
+    ${step.multi?'<div class="multi-hint">You can choose more than one.</div>':''}
+    <div id="rqOpts"></div>
+    <div class="btn-row">
+      ${rqState.i>0?'<button class="btn ghost" onclick="rqPrev()">Back</button>':''}
+      <button class="btn" id="rqNext" onclick="rqNext()">${step.multi?'Continue':'Continue'}</button>
+    </div>`;
+  const o=document.getElementById('rqOpts');
+  step.opts.forEach(opt=>{
+    const on = step.multi ? sel.includes(opt.v) : sel===opt.v;
+    const b=document.createElement('button');
+    b.className='opt'+(on?' sel':'');
+    b.innerHTML=`<span class="oh">${opt.h}</span>${opt.s?`<span class="os">${opt.s}</span>`:''}`;
+    b.onclick=()=>{
+      if(step.multi){
+        let arr=rqState.ans[step.id]||[];
+        if(opt.v==='none'){ arr=['none']; }
+        else { arr=arr.filter(x=>x!=='none'); arr.includes(opt.v)?arr=arr.filter(x=>x!==opt.v):arr.push(opt.v); }
+        rqState.ans[step.id]=arr;
+      } else { rqState.ans[step.id]=opt.v; }
+      renderRQ();
+    };
+    o.appendChild(b);
+  });
+}
+function rqNext(){
+  const step=RQ[rqState.i];
+  const a=rqState.ans[step.id];
+  if(!a||(step.multi&&a.length===0)){ toast('Pick what fits — or the "not sure" option'); return; }
+  rqState.i++; renderRQ();
+}
+function rqPrev(){ if(rqState.i>0){rqState.i--;renderRQ();} }
+
+function scoreRQ(){
+  let score=0; const flags=[];
+  const a=rqState.ans;
+  const add=(w)=>score+=w;
+  // body
+  (a.body||[]).forEach(v=>{ const o=RQ[1].opts.find(x=>x.v===v); if(o)add(o.w); });
+  if((a.body||[]).some(v=>['froze','sick','small'].includes(v)))
+    flags.push({t:"<b>Your body reacted.</b> Freezing, nausea, or wanting to flee are involuntary stress responses — signs something felt genuinely unsafe."});
+  // delay
+  const d=RQ[2].opts.find(x=>x.v===a.delay); if(d)add(d.w);
+  if(a.delay==='hours'||a.delay==='now')
+    flags.push({t:"<b>Delayed recognition is normal.</b> Realizing later doesn't mean it wasn't real, and it doesn't weaken your account. It's one of the most common trauma responses there is."});
+  // signals
+  (a.signals||[]).forEach(v=>{ const o=RQ[3].opts.find(x=>x.v===v); if(o)add(o.w); });
+  const sigNames={private:'secrecy',test:'boundary-testing',favor:'favors with strings',isolate:'isolation',deny:'making you doubt yourself',threat:'career pressure'};
+  const chosen=(a.signals||[]).filter(v=>v!=='none');
+  if(chosen.length)
+    flags.push({t:`<b>You named ${chosen.length} known warning sign${chosen.length>1?'s':''}:</b> ${chosen.map(v=>sigNames[v]).join(', ')}. These are recognized tactics — not things a respectful person does by accident.`});
+  // position
+  const p=RQ[4].opts.find(x=>x.v===a.position); if(p)add(p.w);
+  if(a.position==='over')
+    flags.push({t:"<b>There's a power difference.</b> When the person outranks or evaluates you, saying no carries real risk — which is exactly why the responsibility sits with them, not you."});
+  if(a.setting==='touch') add(2);
+  if(a.setting==='power') add(1);
+  return {score, flags};
+}
+function renderRQResult(){
+  const host=document.getElementById('rqHost');
+  const {score,flags}=scoreRQ();
+  let tier,badge,k,head,body;
+  if(score>=8){ tier='strong'; k='Worth acting on'; head="What you're describing lines up with serious warning signs.";
+    body="You don't need to be certain, and you don't need to have it all figured out. This is the kind of situation a SARC or advocate exists for — talking to one costs you nothing and commits you to nothing."; }
+  else if(score>=4){ tier='concern'; k='Worth a closer look'; head="Several things here are worth taking seriously.";
+    body="This may not be nothing. Recording what happened while it's fresh, and watching whether it repeats, will help you see it clearly — and gives you options if it continues."; }
+  else { tier='watch'; k='Trust the unease'; head="There isn't a lot here yet — but you felt something, and that counts.";
+    body="Keep a quiet record. If it stands alone, that's fine. If it starts to repeat, you'll have the beginning of a timeline instead of a blur of half-memories."; }
+
+  host.innerHTML=`
+    <div class="result-badge ${tier}">
+      <div class="k">${k}</div>
+      <h2>${head}</h2>
+      <p>${body}</p>
+    </div>
+    <div class="note"><b>This is not a diagnosis or a verdict.</b> Compass can't decide what happened — only you and, if you choose, a trained advocate can. What it can do is help you see the shape of it.</div>
+    ${flags.length?`<div class="section-label">What stood out</div><div class="card"><ul class="flag-list">${flags.map(f=>`<li><div class="fi">!</div><div class="ft">${f.t}</div></li>`).join('')}</ul></div>`:''}
+    <div class="section-label">What now — your call</div>
+    <button class="btn" onclick="saveFromRecog()">Save this as a record</button>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="show('s-report')">See my options</button>
+      <button class="btn ghost" onclick="goHome()">Not now</button>
+    </div>
+    <div class="footer-note" style="padding-top:22px">Nothing here has been shared or reported. It's yours, on this device.</div>`;
+  db.recog.push({t:Date.now(),score,tier}); save();
+}
+function saveFromRecog(){
+  const a=rqState.ans;
+  const catMap={touch:'sh',oneword:'ha',exclude:'ha',power:'ha',unsure:'ot'};
+  let cat=catMap[a.setting]||'ot';
+  if((a.signals||[]).includes('threat')) cat='re';
+  const seed={
+    cat,
+    title:'',
+    body:'',
+    person:'',
+    prefill:{signals:a.signals||[], body:a.body||[], delay:a.delay, position:a.position}
+  };
+  newEntry(seed);
+}
+
+/* =========================================================
+   JOURNAL
+   ========================================================= */
+const CATS={sh:{l:'Sexual misconduct',c:'cat-sh'},ha:{l:'Harassment / bullying',c:'cat-ha'},
+  di:{l:'Discrimination',c:'cat-di'},re:{l:'Reprisal / retaliation',c:'cat-re'},ot:{l:'Other / unsure',c:'cat-ot'}};
+let jFilter='all';
+function renderJournal(){
+  const row=document.getElementById('filterRow'); row.innerHTML='';
+  const filters=[['all','All'],['sh','Sexual'],['ha','Harassment'],['di','Discrimination'],['re','Reprisal'],['ot','Other']];
+  filters.forEach(([v,l])=>{const b=document.createElement('button');b.className='chip'+(jFilter===v?' on':'');b.textContent=l;b.onclick=()=>{jFilter=v;renderJournal();};row.appendChild(b);});
+  const host=document.getElementById('entryList');
+  let list=db.entries.slice().sort((a,b)=>b.when-a.when);
+  if(jFilter!=='all') list=list.filter(e=>e.cat===jFilter);
+  if(list.length===0){
+    host.innerHTML=`<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16a1 1 0 0 0 1 1h15"/><path d="M8 8h9M8 12h9M8 16h6"/></svg>
+      <h3>${jFilter==='all'?'Nothing recorded yet':'None in this category'}</h3>
+      <p>${jFilter==='all'?'When something happens — or when you remember something — write it here. Even a few words, even if you are not sure it matters.':'Try another filter, or add a new record.'}</p></div>`;
+    return;
+  }
+  host.innerHTML='';
+  list.forEach(e=>{
+    const dt=new Date(e.when);
+    const cat=CATS[e.cat]||CATS.ot;
+    const meta=[];
+    if(e.person) meta.push('👤 '+escapeHtml(e.person));
+    if(e.where) meta.push('📍 '+escapeHtml(e.where));
+    if(e.witness) meta.push('👁 '+escapeHtml(e.witness));
+    if(e.evidence) meta.push('📎 '+escapeHtml(e.evidence));
+    const div=document.createElement('div'); div.className='entry';
+    div.innerHTML=`
+      <div class="entry-top">
+        <span class="entry-date">${dt.toLocaleDateString([], {weekday:'short',year:'numeric',month:'short',day:'numeric'})} · ${dt.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span>
+        <span class="entry-cat ${cat.c}">${cat.l}</span>
+      </div>
+      ${e.title?`<h4>${escapeHtml(e.title)}</h4>`:''}
+      <div class="ebody">${escapeHtml(e.body||'(no description)')}</div>
+      ${meta.length?`<div class="emeta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
+      <div class="entry-actions">
+        <button onclick="editEntry('${e.id}')">Edit</button>
+        <button onclick="delEntry('${e.id}')">Delete</button>
+      </div>`;
+    host.appendChild(div);
+  });
+}
+function newEntry(seed){
+  const now=new Date();
+  const e={id:'e'+Date.now(), when:now.getTime(), cat:seed&&seed.cat?seed.cat:'ot',
+    title:'', body:'', person:'', where:'', witness:'', evidence:'', feelings:[], _prefill:seed&&seed.prefill};
+  editEntry(null, e);
+}
+function editEntry(id, seedObj){
+  const e = seedObj || Object.assign({}, db.entries.find(x=>x.id===id));
+  if(!e) return;
+  const dt=new Date(e.when);
+  const dateStr=dt.toISOString().slice(0,10);
+  const timeStr=dt.toTimeString().slice(0,5);
+  const feelChips=['Frozen','Sick / knot in stomach','Wanted to leave','Ashamed','Angry','Confused','Scared','Numb'];
+  const host=document.getElementById('entryHost');
+  host.innerHTML=`
+    <p class="lede">Write it the way you'd tell a trusted friend. Exact words matter more than tidy sentences.</p>
+    <div class="field">
+      <label>What kind of moment was this?</label>
+      <select id="f-cat">
+        ${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${e.cat===k?'selected':''}>${v.l}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label>When did it happen?</label>
+      <div style="display:flex;gap:10px">
+        <input type="date" id="f-date" value="${dateStr}" style="flex:1">
+        <input type="time" id="f-time" value="${timeStr}" style="flex:1">
+      </div>
+    </div>
+    <div class="field">
+      <label>A short title <span class="hint">optional — e.g. "comment in the break room"</span></label>
+      <input type="text" id="f-title" value="${escapeAttr(e.title)}" placeholder="Optional">
+    </div>
+    <div class="field">
+      <label>What happened?</label>
+      <textarea id="f-body" placeholder="What was said or done? Try to capture exact words in quotes if you can. What led up to it, and what happened right after.">${escapeHtml(e.body)}</textarea>
+    </div>
+    <div class="field">
+      <label>How did you feel — in your body?</label>
+      <div class="chips" id="feelChips">
+        ${feelChips.map(f=>`<button class="chip ${(e.feelings||[]).includes(f)?'on':''}" data-f="${f}">${f}</button>`).join('')}
+      </div>
+    </div>
+    <div class="field">
+      <label>Who was involved? <span class="hint">a name or description — recording the same person twice is how patterns surface</span></label>
+      <input type="text" id="f-person" value="${escapeAttr(e.person)}" placeholder="Name, rank, or 'the shift supervisor'">
+    </div>
+    <div class="field">
+      <label>Where? <span class="hint">optional</span></label>
+      <input type="text" id="f-where" value="${escapeAttr(e.where)}" placeholder="Location">
+    </div>
+    <div class="field">
+      <label>Anyone else there? <span class="hint">optional — witnesses matter later</span></label>
+      <input type="text" id="f-witness" value="${escapeAttr(e.witness)}" placeholder="Who saw or heard it">
+    </div>
+    <div class="field">
+      <label>Anything that backs it up? <span class="hint">optional — texts, emails, photos, messages. Note where they are.</span></label>
+      <input type="text" id="f-evidence" value="${escapeAttr(e.evidence)}" placeholder="e.g. 'screenshot saved in Photos, 6:12pm'">
+    </div>
+    ${e._prefill?renderPrefillNote(e._prefill):''}
+    <button class="btn" onclick="commitEntry('${e.id}', ${seedObj&&!db.entries.find(x=>x.id===e.id)?'true':'false'})">Save record</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="goBack()">Cancel</button>
+    <div class="note" style="margin-top:18px"><b>Reminder:</b> this record lives only on this phone. It helps you remember accurately — it isn't an official report, and only you can start one of those.</div>
+  `;
+  host.querySelectorAll('#feelChips .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
+  window._editing=e;
+  show('s-entry');
+}
+function renderPrefillNote(p){
+  const bits=[];
+  const sigNames={private:'secrecy',test:'boundary-testing',favor:'favors with strings',isolate:'isolation',deny:'making you doubt yourself',threat:'career pressure'};
+  if(p.signals&&p.signals.filter(x=>x!=='none').length) bits.push('signals you flagged: '+p.signals.filter(x=>x!=='none').map(v=>sigNames[v]).join(', '));
+  if(p.position==='over') bits.push('person is senior to you');
+  if(p.delay==='hours'||p.delay==='now') bits.push('recognized after some delay');
+  if(!bits.length) return '';
+  return `<div class="note amber"><b>Carried over from your questions:</b> ${bits.join(' · ')}. Feel free to add detail above.</div>`;
+}
+function commitEntry(id, isNew){
+  const e=window._editing;
+  const d=document.getElementById('f-date').value, t=document.getElementById('f-time').value||'00:00';
+  e.when=new Date(d+'T'+t).getTime()||Date.now();
+  e.cat=document.getElementById('f-cat').value;
+  e.title=document.getElementById('f-title').value.trim();
+  e.body=document.getElementById('f-body').value.trim();
+  e.person=document.getElementById('f-person').value.trim();
+  e.where=document.getElementById('f-where').value.trim();
+  e.witness=document.getElementById('f-witness').value.trim();
+  e.evidence=document.getElementById('f-evidence').value.trim();
+  e.feelings=[...document.querySelectorAll('#feelChips .chip.on')].map(c=>c.dataset.f);
+  delete e._prefill;
+  if(!e.body && !e.title){ toast('Add at least a few words'); return; }
+  const existing=db.entries.findIndex(x=>x.id===e.id);
+  if(existing>=0) db.entries[existing]=e; else db.entries.push(e);
+  save(); toast('Saved to this device'); goHome(); refreshHome();
+}
+function delEntry(id){
+  modal(`<h3>Delete this record?</h3><p>This can't be undone. If this record might matter to a future report, consider keeping it.</p>
+    <button class="btn danger" onclick="confirmDel('${id}')">Delete</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">Keep it</button>`);
+}
+function confirmDel(id){ db.entries=db.entries.filter(x=>x.id!==id); save(); closeModal(); renderJournal(); refreshHome(); toast('Deleted'); }
+
+/* =========================================================
+   LEARN — how tactics work
+   ========================================================= */
+function renderLearn(){
+  document.getElementById('learnHost').innerHTML=`
+    <p class="lede">Most harm doesn't announce itself. It arrives as something small, deniable, easy to explain away. Naming the method is how "maybe I imagined it" turns into "I see what that was."</p>
+
+    <div class="section-label">Why you might not notice at first</div>
+    <div class="card">
+      <h3>It's designed to be deniable</h3>
+      <p>A skilled offender moves in ways that each look minor on their own — a hand that lingers a second too long, a joke aimed at you, a "compliment" with an edge. Any single moment can be waved off. That deniability is the tactic, not a coincidence.</p>
+    </div>
+    <div class="card">
+      <h3>Recognizing it later is the rule, not the exception</h3>
+      <p>Freezing in the moment and understanding it hours, days, or weeks later is a normal nervous-system response. Delay does not mean consent, and it does not make your account less true.</p>
+    </div>
+    <div class="card">
+      <h3>Doubt gets planted on purpose</h3>
+      <p>"You're too sensitive." "That's not what happened." "Can't you take a joke?" When someone works to make you distrust your own memory, that itself is a warning sign — it's called being made to doubt what you experienced.</p>
+    </div>
+
+    <div class="section-label">The common tactics</div>
+    ${[
+      ['Boundary-testing','Small intrusions that escalate — standing too close, a touch on the shoulder, then the back — each one a test of whether you will push back. Compliance with a small thing is treated as permission for the next.'],
+      ['Isolation','Getting you alone: the extra shift together, the ride, the private talk away from everyone. Separation from others removes witnesses and support.'],
+      ['Favors with strings','Help, gifts, or special treatment offered freely — then quietly expected to be repaid. It reframes an obligation as something you "owe."'],
+      ['Secrecy','"Keep this between us." Secrecy protects the person doing harm, not you. A relationship that requires hiding is worth questioning.'],
+      ['Using rank or role','A senior, rater, or instructor leveraging the fact that your standing, evaluation, or career sits partly in their hands. The power gap makes "no" costly — which is why the responsibility is entirely theirs.'],
+      ['Career pressure','Hints that speaking up, or not going along, could cost you an assignment, a rating, or a reputation. Tying your future to your silence is a serious red flag.'],
+    ].map(([t,d])=>`<div class="card"><h3>${t}</h3><p>${d}</p></div>`).join('')}
+
+    <div class="section-label">Exclusion & bullying can be just as real</div>
+    <div class="card">
+      <h3>When it's not one event but a climate</h3>
+      <p>Being consistently talked over, left off the email, assigned the worst tasks, mocked, or frozen out doesn't leave a single dramatic moment to point to. That's why it's so often dismissed. A timeline of small exclusions is exactly how you make an invisible pattern visible.</p>
+    </div>
+
+    <div class="note"><b>If any of this sounds familiar,</b> the "Was that okay?" walkthrough can help you look at a specific moment, and the record keeps it from fading. Neither one shares anything or commits you to reporting.</div>
+    <button class="btn" onclick="startRecognition()">Look at a specific moment</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="show('s-report')">See reporting options</button>
+  `;
+}
+
+/* =========================================================
+   FEAR — the career fear + you're not alone
+   ========================================================= */
+function renderFear(){
+  document.getElementById('fearHost').innerHTML=`
+    <p class="lede">The hardest part usually isn't naming what happened. It's the fear of what happens after you say it out loud. That fear is real and reasonable — so let's be honest about it instead of pretending it away.</p>
+
+    <div class="section-label">The fear, named plainly</div>
+    <div class="card">
+      <h3>"It'll cost me my career."</h3>
+      <p>This is the number one reason people stay silent — and it isn't paranoia. Retaliation does happen. But here's what many people don't know: punishing you for reporting is itself illegal, and it's a separate violation you can report on its own.</p>
+    </div>
+
+    <div class="note amber"><b>Retaliation has a name: reprisal.</b> Taking or threatening an unfavorable personnel action — a bad evaluation, a punitive reassignment, being frozen out — because you made a protected report violates federal law (10 U.S.C. §1034). It is not the price of speaking up. It's a second thing that can be investigated by the IG.</div>
+
+    <div class="section-label">What changes the math</div>
+    <div class="card">
+      <h3>You don't have to go all-in to start</h3>
+      <p>A <b>restricted report</b> lets you get medical care, counseling, and a victim advocate <b>without</b> notifying your command or starting an investigation. It's a real door between silence and a full investigation — one many people don't realize exists.</p>
+    </div>
+    <div class="card">
+      <h3>Recording now doesn't commit you to anything</h3>
+      <p>Keeping a private, dated record changes nothing about your standing today. It triggers no process. But evidence fades and memories blur — so a quiet record now means that <b>if</b> you decide to act later, you do it from a position of strength instead of scrambling to reconstruct what happened.</p>
+      <p style="margin-top:8px">Record now. Decide later. Those are two separate choices, and you only have to make the first one today.</p>
+    </div>
+
+    <div class="note"><b>An honest word:</b> no one can promise reporting will be painless — and any tool that tells you otherwise is lying to you. What's true is this: retaliation is illegal, it can be documented and challenged, and you do not have to carry any of it alone.</div>
+
+    <div class="section-label">You won't be doing it alone</div>
+    <p class="lede" style="font-size:15px">Reporting is something you initiate — but not something you have to walk through by yourself. These people exist specifically to stand beside you, and most cost nothing.</p>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-sea">⚖</div><div><h3>Your own free attorney (SVC / VLC / VC)</h3><div class="pw">A lawyer who works only for you</div></div></div>
+      <div class="path-body">
+        <p>The military assigns sexual-assault victims a dedicated, free attorney whose only job is <b>your</b> interests — not the command's, not the prosecutor's. The name depends on your branch:</p>
+        <ul>
+          <li><b>Special Victims' Counsel (SVC)</b> — Army, National Guard, Coast Guard</li>
+          <li><b>Victims' Legal Counsel (VLC)</b> — Navy, Marine Corps</li>
+          <li><b>Victims' Counsel (VC)</b> — Air Force</li>
+        </ul>
+        <div class="kv"><span class="k">Key point</span><span class="v">You can access this counsel whether you file restricted, unrestricted, or haven't reported at all yet.</span></div>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-amber">🤝</div><div><h3>SARC & Victim Advocate</h3><div class="pw">Support and guidance through every step</div></div></div>
+      <div class="path-body">
+        <p>A SARC or SAPR Victim Advocate helps you understand your options, comes with you to appointments, and can help you put words to what happened when it's hard to. Free, and confidential if you report restricted.</p>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-sand">🩺</div><div><h3>MST Coordinator</h3><div class="pw">At every VA medical center</div></div></div>
+      <div class="path-body">
+        <p>For Military Sexual Trauma, each VA facility has a coordinator who connects you to care. MST-related treatment is available <b>free</b>, and you don't need a filed report or a disability rating to get it.</p>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-ink">📋</div><div><h3>VSO — Veterans Service Officer</h3><div class="pw">Free help with VA disability claims</div></div></div>
+      <div class="path-body">
+        <p>Groups like the VFW, DAV, and American Legion have officers who help you file VA claims — including MST claims — at no cost. They do this constantly and know the process.</p>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-sea">📞</div><div><h3>Outside organizations</h3><div class="pw">Independent of your command</div></div></div>
+      <div class="path-body">
+        <p><b>Protect Our Defenders</b> focuses on service members facing sexual assault and retaliation, and can connect you to free legal help. <b>RAINN</b> offers 24/7 confidential support and help thinking through next steps.</p>
+        <div class="kv"><span class="k">And remember</span><span class="v">A trusted friend, family member, or fellow service member coming with you counts too — and witnesses matter later.</span></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="show('s-report')">See the reporting doors</button>
+      <button class="btn ghost" onclick="show('s-journal')">Start a record</button>
+    </div>
+    <div class="footer-note" style="padding-top:20px">Nothing here reports anything or notifies anyone. It's information, on your device, for whenever you're ready.</div>
+  `;
+}
+
+/* =========================================================
+   RECOVERY — don't let it harden you
+   ========================================================= */
+function renderRecover(){
+  document.getElementById('recoverHost').innerHTML=`
+    <p class="lede">Reporting is about accountability for what was done to you. This part is about something reporting can't touch — what the experience does to you over time, and making sure it doesn't quietly turn you into someone you never wanted to be.</p>
+
+    <div class="section-label">The thing no one says out loud</div>
+    <div class="card">
+      <h3>Unhealed pain doesn't just sit still</h3>
+      <p>When a wound like this goes untended, people often build armor to survive: they get guarded, sharp, quick to expect the worst. That armor makes sense — it kept you safe. But left unchecked, it can start to aim outward, at people who never hurt you. That's how hurt gets passed down a chain.</p>
+    </div>
+    <div class="note"><b>This is not a warning about you — it's a reason to care for yourself.</b> Noticing this risk is exactly what keeps you from it. People who are becoming harsh rarely see it happening; the fact that you can see it means you're already resisting it.</div>
+
+    <div class="card">
+      <h3>Recovery isn't a luxury — it's how you protect your future self</h3>
+      <p>Getting care isn't weakness or self-indulgence. It's the thing that keeps the damage from spreading — into your relationships, your work, the people who'll depend on you later. You heal not only for your own sake, but so the harm stops with you.</p>
+    </div>
+
+    <div class="section-label">What "getting care" can actually look like</div>
+    <div class="card"><h3>Talk to a professional</h3><p>A counselor or therapist — ideally one experienced with trauma or MST — helps you make sense of it out loud, where it loses some of its grip. Through the VA, MST-related care is free and doesn't require a report or a rating.</p></div>
+    <div class="card"><h3>Peer support</h3><p>Other people who've been through it can remind you that your reactions are normal and that you're not alone or "crazy." Sometimes being believed by someone who gets it does more than anything else.</p></div>
+    <div class="card"><h3>Get it out of your own head</h3><p>Turning it over alone, endlessly, feeds the worst interpretations — including the ones about yourself. Saying it to a trusted person, or even writing it down here, breaks that loop.</p></div>
+
+    <div class="section-label">If it ever gets very dark</div>
+    <p class="lede" style="font-size:15px">Some days the weight is heavier than others. If you ever feel like you can't go on, or you're thinking about hurting yourself, please reach out right then — you don't have to be in a full crisis to use these.</p>
+    <div class="hot"><div class="hi">☎</div><div><h4>Veterans / Military Crisis Line</h4><p>24/7, confidential — press 1 after dialing</p></div><div class="num">988 › 1</div></div>
+    <div class="hot"><div class="hi">✉</div><div><h4>Crisis Line by text</h4><p>When talking is too much</p></div><div class="num">838255</div></div>
+    <div class="hot"><div class="hi">🛡</div><div><h4>DoD Safe Helpline</h4><p>24/7 confidential support for sexual assault</p></div><div class="num">877-995-5247</div></div>
+
+    <div class="note"><b>One last thing.</b> The care you're building this tool to give other people — you're allowed to give it to yourself too. You are exactly the kind of person it's meant to help.</div>
+  `;
+}
+
+/* =========================================================
+   REPORT — DoD pathways (verified against SAPR/EO/IG guidance)
+   ========================================================= */
+function renderReport(){
+  document.getElementById('reportHost').innerHTML=`
+    <p class="lede">In the U.S. Armed Forces, different concerns go through different doors. Here's what each door is for — in plain terms — so you can choose with your eyes open. You can talk to any of them without committing to anything.</p>
+
+    <div class="note alarm"><b>In immediate danger, call 911.</b> These pathways are for reporting and support, not emergencies.</div>
+
+    <div class="pattern-alert" style="cursor:pointer" onclick="show('s-fear')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg>
+      <div><h4>Afraid this could cost you?</h4><p>If fear of retaliation or facing it alone is holding you back, read this first — including the free people who can stand beside you.</p><button>Before you speak up →</button></div>
+    </div>
+
+    <div class="section-label">Talk to someone now — confidential</div>
+    <div class="hot"><div class="hi">☎</div><div><h4>DoD Safe Helpline</h4><p>24/7, confidential, for sexual assault</p></div><div class="num">877-995-5247</div></div>
+    <div class="hot"><div class="hi">☎</div><div><h4>988 Lifeline</h4><p>Crisis & emotional support · press 1 for Veterans/Military</p></div><div class="num">988</div></div>
+    <div class="hot"><div class="hi">☎</div><div><h4>DoD IG Hotline</h4><p>Fraud, abuse of authority, whistleblower reprisal</p></div><div class="num">800-424-9098</div></div>
+
+    <div class="section-label">The three main doors</div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-sea">🛡</div><div><h3>SAPR — for sexual assault or sexual harassment</h3><div class="pw">Through a SARC or SAPR Victim Advocate</div></div></div>
+      <div class="path-body">
+        <p>A SARC (Sexual Assault Response Coordinator) or Victim Advocate gives you support, medical referral, and — importantly — a choice about how much becomes official. You get two options:</p>
+        <ul>
+          <li><b>Restricted report:</b> confidential. You get medical care, counseling, and advocacy <b>without</b> triggering an investigation or notifying your command. Good if you want support but aren't ready for an investigation.</li>
+          <li><b>Unrestricted report:</b> notifies command and law enforcement and starts an investigation. It also unlocks protections like a military protective order and expedited transfer.</li>
+        </ul>
+        <div class="kv"><span class="k">You can switch</span><span class="v">Restricted → Unrestricted anytime. But not the reverse — once it's unrestricted, it can't go back.</span></div>
+        <div class="kv"><span class="k">It's preserved</span><span class="v">Your reporting-preference form (and secured evidence) is retained for 50 years.</span></div>
+        <div class="kv"><span class="k">Heads-up</span><span class="v">Some people — like most instructors and anyone in your chain — are mandated reporters. A SARC or VA is the confidential route.</span></div>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-amber">⚖</div><div><h3>EO — for discrimination or harassment</h3><div class="pw">Military Equal Opportunity office</div></div></div>
+      <div class="path-body">
+        <p>Equal Opportunity handles harassment or discrimination based on <b>race, color, sex (including sexual harassment), religion, or national origin</b>, including bullying tied to those. If sexual harassment overlaps with SAPR, a SARC can also be involved.</p>
+        <ul>
+          <li>EO can pursue an informal resolution or a formal complaint with an investigation.</li>
+          <li>The alleged offender's commander acts on substantiated findings; you're briefed on the outcome and can appeal.</li>
+        </ul>
+        <div class="kv"><span class="k">Time limit</span><span class="v">Formal EO complaints generally must be filed within 60 days of the incident — don't sit on it.</span></div>
+        <div class="kv"><span class="k">Follow-up</span><span class="v">EO checks back with you afterward, including about any reprisal.</span></div>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="path-head"><div class="pico ico-ink">🔎</div><div><h3>IG — for abuse of authority & reprisal</h3><div class="pw">Inspector General</div></div></div>
+      <div class="path-body">
+        <p>The IG is for wrongdoing that doesn't fit the other doors: abuse of authority, gross mismanagement, waste, or violations of law and regulation. Critically, the IG is the <b>only</b> office that investigates <b>whistleblower reprisal</b> — being punished for making a protected complaint.</p>
+        <ul>
+          <li><b>Reprisal</b> = taking or threatening an unfavorable personnel action (or withholding a favorable one) because you made a protected communication — such as an EO or SAPR complaint, or going to the IG or Congress.</li>
+          <li>If you complained and then got a sudden bad evaluation, a punitive reassignment, or a retaliatory referral — that's what IG exists to examine.</li>
+        </ul>
+        <div class="kv"><span class="k">Tip</span><span class="v">This is exactly where your dated timeline pays off — showing what happened right after you spoke up.</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">Common questions</div>
+    <details class="faq"><summary>I'm not sure it was "bad enough" to report.</summary><div class="fa-body">You don't have to decide that. A SARC or advocate can talk it through <b>confidentially</b> and you can stop at any point. Reaching out is not the same as filing, and filing restricted is not the same as an investigation.</div></details>
+    <details class="faq"><summary>It happened a while ago. Is it too late?</summary><div class="fa-body">For sexual assault, there's generally no short deadline to seek SAPR support, and restricted-report records are kept for 50 years. EO formal complaints do have a tighter window (about 60 days), so if it's discrimination-based, ask sooner rather than later.</div></details>
+    <details class="faq"><summary>Will my command find out automatically?</summary><div class="fa-body">Not with a <b>restricted</b> SAPR report — that's the point of it. With unrestricted reports, EO, and IG, certain notifications happen by design. Ask the office to walk you through exactly who learns what before you decide.</div></details>
+    <details class="faq"><summary>What if the problem is someone in my chain of command?</summary><div class="fa-body">You are not required to go through your chain. SARC, EO, and IG can all be approached directly, and the IG specifically exists for situations where the chain itself is the problem or where you fear reprisal.</div></details>
+    <details class="faq"><summary>Does my record in this app count as a report?</summary><div class="fa-body">No. Your entries here are a private aid to your memory. They can help you give an accurate account later, but starting an official report — and formally preserving evidence — goes through a SARC or the relevant office.</div></details>
+
+    <div class="note"><b>Bring your timeline.</b> When you're ready to talk to any of these offices, an organized record of dates, words, witnesses, and what happened after makes your account far stronger. That's what the record section is for.</div>
+    <button class="btn" onclick="show('s-journal')">Open my record</button>
+  `;
+}
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+function renderSettings(){
+  const s=db.settings;
+  document.getElementById('settingsHost').innerHTML=`
+    <p class="lede">Compass runs entirely on this device. These controls are about your safety and privacy.</p>
+    <div class="card">
+      <div class="set-row"><div><div class="sl">Quick-exit button</div><div class="sd">Shows a floating button that instantly leaves for a neutral website.</div></div>
+        <div class="toggle ${s.quickExit?'on':''}" onclick="toggleSet('quickExit')"></div></div>
+      <div class="set-row"><div><div class="sl">Change PIN</div><div class="sd">Set a new lock code.</div></div>
+        <button class="btn ghost small" onclick="changePin()">Change</button></div>
+    </div>
+
+    <div class="section-label">Your data</div>
+    <div class="card">
+      <div class="set-row"><div><div class="sl">Export a copy</div><div class="sd">Save your records as a text file you control — for your own backup or to bring to an advocate.</div></div>
+        <button class="btn ghost small" onclick="exportData()">Export</button></div>
+      <div class="set-row"><div><div class="sl">Erase everything</div><div class="sd">Permanently deletes all records and settings from this device.</div></div>
+        <button class="btn ghost small" style="color:var(--alarm);border-color:var(--alarm)" onclick="wipeAll()">Erase</button></div>
+    </div>
+
+    <div class="note"><b>Nothing leaves this phone unless you export it.</b> There is no account, no cloud, and no network connection. That also means: if you lose the phone or clear its data, the records are gone. Export if you want a backup.</div>
+
+    <div class="footer-note">Compass is a private tool for noticing and recording. It is not legal advice, not a medical or investigative service, and not an official reporting channel. Reporting pathways described reflect general U.S. Armed Forces (DoD) guidance and can vary by installation — confirm specifics with your SARC, EO, or IG.</div>
+  `;
+}
+function toggleSet(k){ db.settings[k]=!db.settings[k]; save(); renderSettings();
+  document.getElementById('quickExit').classList.toggle('show', db.settings.quickExit); }
+function changePin(){ pinBuf='';pinMode='set';pinTmp='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('lock').classList.add('active');
+  document.getElementById('lockTitle').textContent='Set a PIN';
+  document.getElementById('lockSub').textContent='Choose 4–8 digits';
+  drawDots(); }
+function exportData(){
+  const lines=['COMPASS — PRIVATE RECORD EXPORT','Generated '+new Date().toLocaleString(),'',
+    'This is your personal record. Keep it secure.','================================',''];
+  db.entries.slice().sort((a,b)=>a.when-b.when).forEach((e,i)=>{
+    const dt=new Date(e.when);
+    lines.push(`#${i+1} — ${dt.toLocaleString()}`);
+    lines.push('Category: '+(CATS[e.cat]?CATS[e.cat].l:'Other'));
+    if(e.title) lines.push('Title: '+e.title);
+    lines.push('What happened: '+(e.body||'—'));
+    if(e.feelings&&e.feelings.length) lines.push('Felt: '+e.feelings.join(', '));
+    if(e.person) lines.push('Person: '+e.person);
+    if(e.where) lines.push('Where: '+e.where);
+    if(e.witness) lines.push('Witness: '+e.witness);
+    if(e.evidence) lines.push('Evidence: '+e.evidence);
+    lines.push('--------------------------------','');
+  });
+  if(db.entries.length===0) lines.push('(no records)');
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='compass-record-'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast('Exported');
+}
+function wipeAll(){
+  modal(`<h3>Erase everything?</h3><p>This permanently deletes every record and setting from this device. It cannot be undone. Consider exporting first.</p>
+    <button class="btn danger" onclick="confirmWipe()">Erase all data</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">Cancel</button>`);
+}
+function confirmWipe(){ localStorage.removeItem(DB_KEY); db=load(); closeModal(); toast('All data erased'); goHome(); refreshHome(); }
+
+/* ---------- utils ---------- */
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2100);}
+function modal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalBg').classList.add('on');}
+function closeModal(){document.getElementById('modalBg').classList.remove('on');}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function escapeAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+/* ---------- boot ---------- */
+function boot(){
+  buildKeys();
+  if(!db.pin){ pinMode='set';
+    document.getElementById('lockTitle').textContent='Set a PIN';
+    document.getElementById('lockSub').textContent='Choose 4–8 digits to protect your records';
+    document.getElementById('lockNote').textContent='This lock stays on your device. Anthropic and no one else can see or recover it — so pick something you\'ll remember.';
+  }
+  drawDots();
+}
+boot();
+</script>
+</body>
+</html>
