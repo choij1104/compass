@@ -2,1184 +2,1634 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0f1720">
-<title>Compass — Private Recognition & Record</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0B5FD9">
+<meta name="description" content="A simple, private memory aid for older adults. Voice questions, medicine tracking, contacts, and emergency information — all stored on the device.">
+<title>Mind Companion</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mind">
 <style>
-  :root{
-    --ink:#0f1720; --ink-soft:#1c2733; --paper:#f6f4ef; --paper-2:#eceae3;
-    --line:#d9d5cb; --line-2:#c3beb2; --muted:#5d6570; --muted-2:#8a8f97;
-    --sea:#2f6d6a; --sea-deep:#1f4d4b; --sea-soft:#e2ecea;
-    --amber:#b06a34; --amber-soft:#f2e5d7; --sand:#efe9dc;
-    --alarm:#8a3324; --alarm-soft:#f3e0da; --white:#ffffff;
-    --shadow:0 1px 2px rgba(15,23,32,.06),0 8px 28px rgba(15,23,32,.08);
-    --shadow-lg:0 24px 60px rgba(15,23,32,.22);
-    --r:14px; --r-lg:22px;
-    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0}
-  body{
-    font-family:var(--sans); background:var(--paper); color:var(--ink);
-    line-height:1.5; -webkit-font-smoothing:antialiased;
-    padding-bottom:env(safe-area-inset-bottom);
-  }
-  h1,h2,h3{font-family:var(--serif); font-weight:600; letter-spacing:-.01em; margin:0}
-  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
-  input,textarea,select{font-family:inherit; font-size:16px}
-  .screen{display:none; min-height:100vh; animation:fade .35s ease}
-  .screen.active{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  @media (prefers-reduced-motion:reduce){.screen,.card,*{animation:none!important;transition:none!important}}
-  .wrap{max-width:680px; margin:0 auto; padding:0 18px}
+:root{
+  --bg:#EEF3F8;
+  --card:#FFFFFF;
+  --ink:#16202E;
+  --ink-soft:#4A5A6E;
+  --line:#D3DDE8;
+  --blue:#0B5FD9;
+  --green:#1B7A3D;
+  --red:#C0271B;
+  --scale:1;
+  --radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:calc(18px * var(--scale));}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  line-height:1.5;padding-bottom:92px;-webkit-text-size-adjust:100%;
+}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 0;}
 
-  /* ---------- Lock ---------- */
-  #lock{background:var(--ink); color:var(--paper); display:none; min-height:100vh}
-  #lock.active{display:flex; flex-direction:column; justify-content:center}
-  .lock-inner{max-width:360px;margin:0 auto;padding:32px 24px;text-align:center;width:100%}
-  .compass-mark{width:70px;height:70px;margin:0 auto 22px;position:relative}
-  .compass-mark svg{width:100%;height:100%}
-  #lock h1{font-size:26px;color:var(--paper)}
-  #lock p{color:#a9b2bc;font-size:14.5px;margin:8px 0 26px}
-  .pin-dots{display:flex;gap:14px;justify-content:center;margin:8px 0 26px;min-height:18px}
-  .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid #6b7a86;transition:.15s}
-  .pin-dot.on{background:var(--sea);border-color:var(--sea);transform:scale(1.08)}
-  .pin-dot.err{border-color:var(--alarm);background:var(--alarm)}
-  .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:260px;margin:0 auto}
-  .key{aspect-ratio:1.4;border-radius:14px;background:#1c2733;color:var(--paper);font-size:22px;
-    font-weight:500;display:flex;align-items:center;justify-content:center;border:1px solid #2a3948;transition:.1s}
-  .key:active{background:var(--sea-deep);transform:scale(.96)}
-  .key.fn{font-size:13px;color:#a9b2bc;background:transparent;border-color:transparent}
-  .lock-note{margin-top:24px;font-size:12px;color:#7d8894;line-height:1.5}
-  .lock-acro{margin:4px 0 22px;font-size:11px;letter-spacing:.03em;color:#8b96a1;line-height:1.7}
-  .lock-acro b{color:#cdd6de;font-weight:700}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0 14px;}
+.brand{font-size:1.15rem;font-weight:800;letter-spacing:-.3px;}
+.topbtns{display:flex;gap:8px;}
+.chip{
+  border:2px solid var(--line);background:#fff;color:var(--ink);
+  border-radius:12px;padding:8px 12px;font-size:.85rem;font-weight:700;
+  cursor:pointer;min-height:44px;min-width:52px;
+}
 
-  /* ---------- Top bar ---------- */
-  .topbar{position:sticky;top:0;z-index:40;background:rgba(246,244,239,.86);
-    backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);
-    border-bottom:1px solid var(--line)}
-  .topbar-in{max-width:680px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
-  .tb-back{font-size:22px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-    border-radius:10px;color:var(--sea-deep)}
-  .tb-back:active{background:var(--sea-soft)}
-  .tb-title{font-family:var(--serif);font-size:18px;font-weight:600}
-  .tb-spacer{flex:1}
-  .tb-lock{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:5px;
-    padding:6px 11px;border:1px solid var(--line);border-radius:999px}
-  .tb-lock:active{background:var(--paper-2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.card h2{margin:0 0 4px;font-size:1.35rem;letter-spacing:-.4px;}
+.card h3{margin:0 0 12px;font-size:1.1rem;color:var(--ink-soft);}
+.muted{color:var(--ink-soft);font-size:.95rem;margin:0;}
+.tiny{font-size:.82rem;color:var(--ink-soft);}
 
-  /* ---------- Home ---------- */
-  .home-hero{padding:30px 0 8px}
-  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sea);font-weight:700}
-  .home-hero h1{font-size:30px;line-height:1.12;margin:12px 0 10px}
-  .home-hero p{color:var(--muted);font-size:15px;max-width:34em}
-  .home-hero .safety{margin-top:16px;background:var(--sea-soft);border:1px solid #cfe0dd;border-radius:var(--r);
-    padding:13px 15px;font-size:13.5px;color:var(--sea-deep)}
-  .home-hero .safety b{font-weight:700}
+.clock{font-size:2.6rem;font-weight:800;letter-spacing:-1px;line-height:1.1;}
+.datestr{font-size:1.05rem;color:var(--ink-soft);margin-top:2px;}
 
-  .tiles{display:grid;gap:13px;margin:22px 0 10px}
-  .tile{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
-    box-shadow:var(--shadow);display:flex;gap:16px;align-items:flex-start;transition:.14s;text-align:left;width:100%}
-  .tile:active{transform:scale(.99);border-color:var(--line-2)}
-  .tile-ico{width:46px;height:46px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center}
-  .tile-ico svg{width:24px;height:24px}
-  .tile h3{font-size:18px;margin-bottom:3px}
-  .tile p{font-size:13.5px;color:var(--muted);margin:0}
-  .tile .tag{margin-top:9px;font-size:11.5px;color:var(--sea-deep);background:var(--sea-soft);
-    display:inline-block;padding:3px 9px;border-radius:999px;font-weight:600}
-  .ico-sea{background:var(--sea-soft);color:var(--sea-deep)}
-  .ico-amber{background:var(--amber-soft);color:var(--amber)}
-  .ico-sand{background:var(--sand);color:#7a6a4d}
-  .ico-ink{background:var(--paper-2);color:var(--ink-soft)}
+button{font-family:inherit;}
+.btn{
+  display:flex;align-items:center;gap:12px;width:100%;
+  min-height:64px;padding:14px 16px;margin-top:10px;
+  border:2px solid transparent;border-radius:14px;
+  background:var(--blue);color:#fff;font-size:1.1rem;font-weight:700;text-align:left;cursor:pointer;
+}
+.btn:active{transform:scale(.985);}
+.btn .ic{font-size:1.5rem;line-height:1;flex:0 0 auto;}
+.btn.ghost{background:#fff;color:var(--ink);border-color:var(--line);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.small{min-height:52px;font-size:1rem;}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:4px solid #F2B705;outline-offset:2px;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row2 .btn{margin-top:0;}
 
-  .pattern-alert{background:var(--amber-soft);border:1px solid #e4c9a8;border-radius:var(--r);
-    padding:15px 16px;margin:4px 0 2px;display:flex;gap:12px;align-items:flex-start}
-  .pattern-alert svg{width:22px;height:22px;flex:none;color:var(--amber);margin-top:1px}
-  .pattern-alert h4{font-family:var(--serif);font-size:15.5px;margin:0 0 3px}
-  .pattern-alert p{font-size:13px;color:#7a5a34;margin:0}
-  .pattern-alert button{margin-top:9px;font-size:12.5px;color:var(--amber);font-weight:700;text-decoration:underline}
+.mic{
+  width:100%;min-height:132px;border:none;border-radius:20px;
+  background:var(--blue);color:#fff;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  font-size:1.25rem;font-weight:800;
+}
+.mic .dot{font-size:2.6rem;line-height:1;}
+.mic.live{background:var(--red);}
+.mic.live .dot{animation:pulse 1.1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18);opacity:.75}}
+@media (prefers-reduced-motion:reduce){.mic.live .dot{animation:none}}
 
-  /* ---------- Generic content ---------- */
-  .content{padding:22px 0 40px}
-  .lede{font-size:16px;color:var(--ink-soft);margin:0 0 20px;line-height:1.55}
-  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:18px;
-    margin-bottom:14px;box-shadow:var(--shadow)}
-  .card h3{font-size:17px;margin-bottom:7px}
-  .card p{font-size:14px;color:var(--muted);margin:0 0 6px}
-  .section-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);
-    font-weight:700;margin:26px 0 12px}
+.transcript{margin-top:12px;padding:14px;border-radius:12px;background:#F3F7FC;border:1px solid var(--line);font-size:1.05rem;min-height:56px;}
+.transcript b{display:block;font-size:.85rem;color:var(--ink-soft);margin-bottom:4px;}
+.answer{background:#EAF6EE;border-color:#BEDFC9;}
 
-  .note{background:var(--sea-soft);border-left:3px solid var(--sea);border-radius:8px;padding:13px 15px;
-    font-size:13.5px;color:var(--sea-deep);margin:14px 0}
-  .note.amber{background:var(--amber-soft);border-color:var(--amber);color:#7a5a34}
-  .note.alarm{background:var(--alarm-soft);border-color:var(--alarm);color:var(--alarm)}
-  .note b{font-weight:700}
+.item{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff;}
+.item .txt{flex:1;min-width:0;}
+.item .txt strong{display:block;font-size:1.1rem;}
+.item .txt span{color:var(--ink-soft);font-size:.92rem;word-break:break-word;}
+.item.done{background:#EAF6EE;border-color:#BEDFC9;}
+.tap{flex:0 0 auto;min-width:60px;min-height:56px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:1.4rem;cursor:pointer;}
+.tap.on{background:var(--green);border-color:var(--green);color:#fff;}
+.tap.call{background:var(--green);border-color:var(--green);color:#fff;font-size:1.3rem;}
+.tap.del{color:var(--red);font-size:1.2rem;}
 
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--sea);
-    color:#fff;font-weight:600;font-size:15px;padding:14px 20px;border-radius:12px;width:100%;
-    box-shadow:0 6px 16px rgba(47,109,106,.24);transition:.12s}
-  .btn:active{transform:translateY(1px);background:var(--sea-deep)}
-  .btn.ghost{background:transparent;color:var(--sea-deep);border:1.5px solid var(--line-2);box-shadow:none}
-  .btn.ghost:active{background:var(--paper-2)}
-  .btn.amber{background:var(--amber);box-shadow:0 6px 16px rgba(176,106,52,.24)}
-  .btn.small{width:auto;font-size:13.5px;padding:10px 16px}
-  .btn.danger{background:var(--alarm)}
-  .btn-row{display:flex;gap:10px;margin-top:14px}
-  .btn-row .btn{width:auto;flex:1}
+label{display:block;font-weight:700;margin:12px 0 6px;font-size:.98rem;}
+input,select,textarea{
+  width:100%;padding:14px;font-size:1.05rem;font-family:inherit;
+  border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-height:56px;
+}
+textarea{min-height:96px;resize:vertical;}
 
-  /* ---------- Recognition flow ---------- */
-  .rq{padding:24px 0 30px}
-  .rq-progress{height:4px;background:var(--paper-2);border-radius:99px;overflow:hidden;margin-bottom:26px}
-  .rq-progress span{display:block;height:100%;background:var(--sea);transition:width .4s ease}
-  .rq h2{font-size:23px;line-height:1.22;margin-bottom:8px}
-  .rq .sub{color:var(--muted);font-size:14px;margin-bottom:22px}
-  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);
-    border-radius:13px;padding:15px 16px;margin-bottom:10px;font-size:15px;transition:.12s;color:var(--ink)}
-  .opt:active{transform:scale(.99)}
-  .opt.sel{border-color:var(--sea);background:var(--sea-soft)}
-  .opt .oh{font-weight:600;font-size:15px;display:block}
-  .opt .os{font-size:13px;color:var(--muted);margin-top:3px;display:block}
-  .opt.sel .os{color:var(--sea-deep)}
-  .multi-hint{font-size:12.5px;color:var(--muted-2);margin:-4px 0 14px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-left)) max(6px,env(safe-area-inset-bottom));}
+.navinner{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;}
+.navbtn{border:none;background:none;cursor:pointer;color:var(--ink-soft);padding:8px 2px;border-radius:12px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.72rem;font-weight:700;}
+.navbtn .ic{font-size:1.5rem;line-height:1;}
+.navbtn[aria-current="page"]{color:var(--blue);background:#EAF1FD;}
 
-  /* ---------- Result ---------- */
-  .result-badge{border-radius:var(--r-lg);padding:22px;color:#fff;margin-bottom:18px;box-shadow:var(--shadow)}
-  .result-badge.watch{background:linear-gradient(135deg,#2f6d6a,#1f4d4b)}
-  .result-badge.concern{background:linear-gradient(135deg,#b06a34,#8a4f24)}
-  .result-badge.strong{background:linear-gradient(135deg,#8a3324,#6d2519)}
-  .result-badge .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:700}
-  .result-badge h2{color:#fff;font-size:24px;margin:8px 0 6px}
-  .result-badge p{color:rgba(255,255,255,.92);font-size:14px;margin:0}
-  .flag-list{list-style:none;padding:0;margin:0}
-  .flag-list li{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
-  .flag-list li:last-child{border-bottom:none}
-  .flag-list .fi{width:26px;height:26px;flex:none;border-radius:8px;background:var(--amber-soft);
-    color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
-  .flag-list .ft{font-size:14px}
-  .flag-list .ft b{font-weight:600}
+.view{display:none;}
+.view.on{display:block;}
+.empty{padding:22px 14px;text-align:center;color:var(--ink-soft);border:2px dashed var(--line);border-radius:14px;}
+.warn{background:#FFF4E5;border:1px solid #F0C486;color:#6B4200;padding:12px 14px;border-radius:12px;font-size:.95rem;margin-bottom:12px;}
+.notice{background:#F7F9FC;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:.9rem;color:var(--ink-soft);line-height:1.55;}
+.foot{text-align:center;color:var(--ink-soft);font-size:.82rem;padding:6px 0 18px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
 
-  /* ---------- Journal / timeline ---------- */
-  .field{margin-bottom:16px}
-  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
-  .field .hint{font-size:12px;color:var(--muted-2);font-weight:400;margin-top:2px}
-  .field input[type=text],.field input[type=date],.field input[type=time],.field textarea,.field select{
-    width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--white);
-    color:var(--ink);transition:.12s}
-  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--sea);
-    box-shadow:0 0 0 3px var(--sea-soft)}
-  .field textarea{min-height:120px;resize:vertical;line-height:1.5}
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;font-size:13px;
-    background:var(--white);transition:.12s;color:var(--ink)}
-  .chip:active{transform:scale(.97)}
-  .chip.on{background:var(--sea);border-color:var(--sea);color:#fff}
-  .body-map{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* mind wellness */
+.moodrow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;}
+.moodbtn{border:2px solid var(--line);background:#fff;border-radius:14px;min-height:84px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.7rem;font-weight:700;color:var(--ink-soft);padding:6px 2px;}
+.moodbtn .em{font-size:1.7rem;line-height:1;}
+.moodbtn.on{border-color:var(--green);background:#EAF6EE;color:var(--ink);}
+.optbtn{display:block;width:100%;min-height:60px;margin-top:10px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:1.02rem;font-weight:700;cursor:pointer;padding:12px;text-align:left;}
+.optbtn:active{transform:scale(.985);}
+.qtext{font-size:1.08rem;font-weight:700;margin-top:14px;}
 
-  .entry{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;
-    margin-bottom:12px;box-shadow:var(--shadow)}
-  .entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
-  .entry-date{font-size:12.5px;color:var(--muted);font-weight:600}
-  .entry-cat{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
-  .cat-sh{background:var(--alarm-soft);color:var(--alarm)}
-  .cat-ha{background:var(--amber-soft);color:var(--amber)}
-  .cat-di{background:var(--sea-soft);color:var(--sea-deep)}
-  .cat-re{background:#e7e2f0;color:#5b4b8a}
-  .cat-ot{background:var(--paper-2);color:var(--muted)}
-  .entry h4{font-family:var(--sans);font-size:15px;font-weight:600;margin:0 0 4px}
-  .entry .ebody{font-size:13.5px;color:var(--ink-soft);white-space:pre-wrap;word-break:break-word}
-  .entry .emeta{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
-  .entry .emeta span{font-size:11.5px;color:var(--muted);background:var(--paper-2);padding:2px 8px;border-radius:6px}
-  .entry-actions{display:flex;gap:8px;margin-top:11px}
-  .entry-actions button{font-size:12.5px;color:var(--muted);padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
-  .entry-actions button:active{background:var(--paper-2)}
-
-  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
-  .empty svg{width:44px;height:44px;color:var(--line-2);margin-bottom:12px}
-  .empty h3{font-size:17px;color:var(--ink-soft);margin-bottom:6px}
-  .empty p{font-size:13.5px;max-width:26em;margin:0 auto}
-
-  .filter-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 -2px;-webkit-overflow-scrolling:touch}
-  .filter-row .chip{white-space:nowrap;flex:none}
-
-  /* ---------- Reporting ---------- */
-  .path{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow)}
-  .path-head{padding:16px 18px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--line)}
-  .path-head .pico{width:40px;height:40px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center}
-  .path-head h3{font-size:16.5px;margin:0}
-  .path-head .pw{font-size:12px;color:var(--muted);margin-top:1px}
-  .path-body{padding:16px 18px}
-  .path-body p{font-size:13.5px;color:var(--ink-soft);margin:0 0 10px}
-  .path-body ul{margin:0 0 6px;padding-left:18px}
-  .path-body li{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
-  .kv{display:flex;gap:8px;font-size:13px;padding:7px 0;border-top:1px dashed var(--line)}
-  .kv .k{font-weight:600;color:var(--ink-soft);min-width:96px}
-  .kv .v{color:var(--muted)}
-  details.faq{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;background:var(--white);overflow:hidden}
-  details.faq summary{padding:14px 15px;font-size:14px;font-weight:600;list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-  details.faq summary::-webkit-details-marker{display:none}
-  details.faq summary::after{content:"+";color:var(--sea);font-size:20px;font-weight:400}
-  details.faq[open] summary::after{content:"–"}
-  details.faq .fa-body{padding:0 15px 15px;font-size:13.5px;color:var(--muted);line-height:1.55}
-  details.faq .fa-body b{color:var(--ink-soft);font-weight:600}
-
-  .hot{display:flex;gap:12px;align-items:center;background:var(--white);border:1px solid var(--line);
-    border-radius:var(--r);padding:14px 16px;margin-bottom:11px;box-shadow:var(--shadow)}
-  .hot .hi{width:40px;height:40px;flex:none;border-radius:11px;background:var(--alarm-soft);color:var(--alarm);
-    display:flex;align-items:center;justify-content:center}
-  .hot h4{font-size:15px;margin:0}
-  .hot p{font-size:12.5px;color:var(--muted);margin:1px 0 0}
-  .hot .num{margin-left:auto;font-weight:700;color:var(--sea-deep);font-size:14px;white-space:nowrap}
-
-  /* ---------- Settings ---------- */
-  .set-row{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
-  .set-row:last-child{border-bottom:none}
-  .set-row .sl{font-size:14.5px;font-weight:500}
-  .set-row .sd{font-size:12.5px;color:var(--muted);margin-top:2px;max-width:22em}
-  .toggle{width:48px;height:28px;border-radius:999px;background:var(--line-2);position:relative;transition:.16s;flex:none}
-  .toggle.on{background:var(--sea)}
-  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
-    background:#fff;transition:.16s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-  .toggle.on::after{transform:translateX(20px)}
-
-  /* ---------- Modal / toast ---------- */
-  .modal-bg{position:fixed;inset:0;background:rgba(15,23,32,.5);z-index:80;display:none;
-    align-items:flex-end;justify-content:center;padding:0}
-  .modal-bg.on{display:flex;animation:fade .2s}
-  .modal{background:var(--paper);width:100%;max-width:680px;border-radius:22px 22px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));
-    box-shadow:var(--shadow-lg);animation:slideup .28s ease}
-  @keyframes slideup{from{transform:translateY(30px)}to{transform:none}}
-  .modal h3{font-size:19px;margin-bottom:8px}
-  .modal p{font-size:14px;color:var(--muted);margin:0 0 18px}
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
-    background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:500;
-    z-index:90;transition:.28s;pointer-events:none;box-shadow:var(--shadow-lg)}
-  .toast.on{opacity:1;transform:translateX(-50%)}
-
-  .footer-note{text-align:center;font-size:11.5px;color:var(--muted-2);padding:24px 20px 34px;line-height:1.6}
-  .footer-note b{color:var(--muted)}
-  .quick-exit{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;
-    background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:11px 15px;border-radius:999px;
-    box-shadow:var(--shadow-lg);display:none;align-items:center;gap:6px}
-  .quick-exit.show{display:flex}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(12,22,36,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal.on{display:flex;}
+.modalbox{background:#fff;border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;}
+.modalbox h2{margin:0 0 10px;font-size:1.3rem;}
 </style>
 </head>
 <body>
 
-<!-- ============ LOCK ============ -->
-<div id="lock" class="active">
-  <div class="lock-inner">
-    <div class="compass-mark">
-      <svg viewBox="0 0 100 100" fill="none">
-        <circle cx="50" cy="50" r="44" stroke="#2f6d6a" stroke-width="2.5"/>
-        <circle cx="50" cy="50" r="3.4" fill="#e2ecea"/>
-        <path d="M50 12 L57 47 L50 50 L43 47 Z" fill="#e2ecea"/>
-        <path d="M50 88 L43 53 L50 50 L57 53 Z" fill="#5d6570"/>
-      </svg>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">🧠 Mind Companion</div>
+    <div class="topbtns">
+      <button class="chip" id="sizeBtn" onclick="bumpScale()" title="Text size">A+</button>
+      <button class="chip" onclick="go('settings')" title="Settings" aria-label="Settings">⚙️</button>
     </div>
-    <h1 id="lockTitle">Compass</h1>
-    <p id="lockSub">Enter your PIN to open</p>
-    <div class="lock-acro" id="lockAcro"><b>C</b>ourage · <b>O</b>wnership · <b>M</b>emory · <b>P</b>rotection · <b>A</b>nd <b>S</b>elf-worth <b>S</b>upport</div>
-    <div class="pin-dots" id="pinDots"></div>
-    <div class="keys" id="keys"></div>
-    <div class="lock-note" id="lockNote">Everything you enter stays on this device only. Nothing is sent anywhere.</div>
+  </div>
+
+  <!-- ================= HOME ================= -->
+  <section class="view on" id="v-home">
+    <div class="card">
+      <div class="clock" id="clock">--:--</div>
+      <div class="datestr" id="datestr"></div>
+      <h2 id="greeting" style="margin-top:14px"></h2>
+      <p class="muted" id="homeSummary"></p>
+    </div>
+
+    <div class="card">
+      <button class="mic" id="micBtn" onclick="toggleListen()">
+        <span class="dot" id="micDot">🎤</span>
+        <span id="micLabel">Press and speak</span>
+      </button>
+      <div class="transcript" id="heard"><b id="heardLbl">I heard</b><span id="heardTxt">—</span></div>
+      <div class="transcript answer" id="reply"><b id="replyLbl">Answer</b><span id="replyTxt">—</span></div>
+      <div id="sttWarn"></div>
+      <button class="btn ghost small" onclick="askByTyping()"><span class="ic">⌨️</span><span id="typeAskLbl">Type a question instead</span></button>
+      <p class="tiny" id="exLbl" style="margin:16px 0 8px">You can ask me things like:</p>
+      <div id="examples"></div>
+    </div>
+
+    <div class="card">
+      <h3 id="todayMedTitle">Today's medicine</h3>
+      <div id="homeMeds"></div>
+    </div>
+  </section>
+
+  <!-- ================= MEDS ================= -->
+  <section class="view" id="v-meds">
+    <div class="card">
+      <h2 id="medsTitle">💊 Medicine</h2>
+      <p class="muted" id="medsHint">Tap the big square when you have taken it.</p>
+      <div id="medList" style="margin-top:14px"></div>
+      <button class="btn ghost" onclick="showForm('med')"><span class="ic">➕</span><span id="addMedLbl">Add medicine</span></button>
+      <div id="medForm" style="display:none">
+        <label id="lbMedName">Medicine name</label>
+        <input id="medName" placeholder="e.g., Blood pressure pill">
+        <label id="lbMedTime">When to take</label>
+        <select id="medTime">
+          <option value="morning">Morning</option>
+          <option value="noon">Noon</option>
+          <option value="evening">Evening</option>
+          <option value="night">Bedtime</option>
+        </select>
+        <label id="lbMedNote">Note (optional)</label>
+        <input id="medNote" placeholder="e.g., 30 minutes after a meal">
+        <div class="row2" style="margin-top:14px">
+          <button class="btn green small" onclick="saveMed()"><span class="ic">✔</span><span class="sv">Save</span></button>
+          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
+        </div>
+      </div>
+      <p class="tiny" id="medDisclaim" style="margin-top:14px"></p>
+    </div>
+  </section>
+
+  <!-- ================= CONTACTS ================= -->
+  <section class="view" id="v-contacts">
+    <div class="card">
+      <h2 id="contactsTitle">📞 Contacts</h2>
+      <p class="muted" id="contactsHint">Press the green button to call right away.</p>
+      <div id="contactList" style="margin-top:14px"></div>
+      <button class="btn ghost" onclick="showForm('contact')"><span class="ic">➕</span><span id="addContactLbl">Add contact</span></button>
+      <div id="contactForm" style="display:none">
+        <label id="lbCName">Name</label>
+        <input id="cName" placeholder="e.g., Jieun (daughter)">
+        <label id="lbCPhone">Phone number</label>
+        <input id="cPhone" type="tel" inputmode="tel" placeholder="210-555-0100">
+        <label id="lbCRole">Relationship / role</label>
+        <select id="cRole">
+          <option value="family">Family</option>
+          <option value="doctor">Doctor · clinic</option>
+          <option value="pharmacy">Pharmacy</option>
+          <option value="repair">Repair · service</option>
+          <option value="friend">Friend · neighbor</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="row2" style="margin-top:14px">
+          <button class="btn green small" onclick="saveContact()"><span class="ic">✔</span><span class="sv">Save</span></button>
+          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NOTES ================= -->
+  <section class="view" id="v-notes">
+    <div class="card">
+      <h2 id="notesTitle">📝 Memory notes</h2>
+      <p class="muted" id="notesHint">Write down where things are, hints, or anything important — then ask by voice.</p>
+      <div style="margin-top:14px">
+        <button class="btn" onclick="voiceNote()"><span class="ic">🎤</span><span id="voiceNoteLbl">Speak to write</span></button>
+        <button class="btn ghost" onclick="showForm('note')"><span class="ic">➕</span><span id="addNoteLbl">Type to write</span></button>
+      </div>
+      <div id="noteForm" style="display:none">
+        <label id="lbNTitle">Title (the word you will ask for)</label>
+        <input id="nTitle" placeholder="e.g., Passport">
+        <label id="lbNBody">Details</label>
+        <textarea id="nBody" placeholder="e.g., Second drawer of the bedroom dresser"></textarea>
+        <div class="row2" style="margin-top:14px">
+          <button class="btn green small" onclick="saveNote()"><span class="ic">✔</span><span class="sv">Save</span></button>
+          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
+        </div>
+      </div>
+      <div id="noteList" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <!-- ================= EMERGENCY ================= -->
+  <section class="view" id="v-sos">
+    <div class="card">
+      <h2 id="sosTitle">🚑 Get help</h2>
+      <p class="muted" id="sosHint">Press the big button in an emergency.</p>
+      <a href="tel:911" style="text-decoration:none"><button class="btn red" style="min-height:96px;font-size:1.5rem"><span class="ic">🚨</span><span id="call911">Call 911</span></button></a>
+      <div id="sosList" style="margin-top:12px"></div>
+      <p class="muted" id="sosSetHint" style="margin-top:10px"></p>
+    </div>
+    <div class="card">
+      <h3 id="myInfoTitle">My information (show to paramedics)</h3>
+      <div id="myInfoView"></div>
+      <button class="btn ghost small" onclick="showForm('me')"><span class="ic">✏️</span><span id="editMeLbl">Edit my information</span></button>
+      <div id="meForm" style="display:none">
+        <label id="lbMeName">Name</label>
+        <input id="meName" placeholder="Full name">
+        <label id="lbMeAddr">Address</label>
+        <input id="meAddr" placeholder="Home address">
+        <label id="lbMeCond">Conditions · allergies</label>
+        <textarea id="meCond" placeholder="e.g., High blood pressure, penicillin allergy"></textarea>
+        <label id="lbMeBlood">Blood type</label>
+        <input id="meBlood" placeholder="e.g., O+">
+        <div class="row2" style="margin-top:14px">
+          <button class="btn green small" onclick="saveMe()"><span class="ic">✔</span><span class="sv">Save</span></button>
+          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MIND WELLNESS ================= -->
+  <section class="view" id="v-well">
+    <div class="card">
+      <h2 id="wTitle">💚 My mind</h2>
+      <p class="muted" id="wHint"></p>
+      <h3 id="wMoodTitle" style="margin-top:16px">How is your mood today?</h3>
+      <div class="moodrow" id="moodRow"></div>
+      <p class="muted" id="moodStatus" style="margin-top:10px"></p>
+    </div>
+
+    <div class="card">
+      <h3 id="wCheckTitle">Mind check</h3>
+      <p class="muted" id="wCheckHint"></p>
+      <button class="btn ghost" onclick="startCheck()"><span class="ic">📋</span><span id="wStartLbl">Answer the two questions</span></button>
+      <div id="wCheckArea"></div>
+      <p class="tiny" id="wDisclaim" style="margin-top:14px"></p>
+    </div>
+
+    <div class="card">
+      <h3 id="wShareTitle">Show at counseling</h3>
+      <p class="muted" id="wShareHint"></p>
+      <button class="btn" onclick="openSummary()"><span class="ic">📄</span><span id="wShareBtnLbl">Open the summary page</span></button>
+    </div>
+
+    <div class="card">
+      <h3 id="wCounselorTitle">Counseling contact</h3>
+      <p class="muted" id="wCounselorHint"></p>
+      <div id="counselorView" style="margin-top:12px"></div>
+      <button class="btn ghost small" onclick="showForm('wc')"><span class="ic">✏️</span><span id="wEditCLbl">Edit counseling contact</span></button>
+      <div id="wcForm" style="display:none">
+        <label id="lbWcName">Counselor name</label>
+        <input id="wcName">
+        <label id="lbWcOrg">Organization / clinic</label>
+        <input id="wcOrg">
+        <label id="lbWcPhone">Phone number</label>
+        <input id="wcPhone" type="tel" inputmode="tel" placeholder="210-555-0100">
+        <div class="row2" style="margin-top:14px">
+          <button class="btn green small" onclick="saveCounselor()"><span class="ic">✔</span><span class="sv">Save</span></button>
+          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="view" id="v-settings">
+    <div class="card">
+      <h2 id="setTitle">⚙️ Settings</h2>
+      <p class="muted" id="setHint">These settings are usually set up once by a family member.</p>
+    </div>
+
+    <div class="card">
+      <h3 id="setTextTitle">Text size</h3>
+      <button class="btn ghost" onclick="bumpScale()"><span class="ic">🔠</span><span id="setTextBtn">Make text larger</span></button>
+    </div>
+
+    <div class="card">
+      <h3 id="setLangTitle">Language</h3>
+      <div class="row2">
+        <button class="btn ghost small" id="langEn" onclick="setLang('en')"><span class="ic">🇺🇸</span><span>English</span></button>
+        <button class="btn ghost small" id="langKo" onclick="setLang('ko')"><span class="ic">🇰🇷</span><span>한국어</span></button>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <button class="btn ghost small" id="langEs" onclick="setLang('es')"><span class="ic">🇲🇽</span><span>Español</span></button>
+        <button class="btn ghost small" id="langJa" onclick="setLang('ja')"><span class="ic">🇯🇵</span><span>日本語</span></button>
+      </div>
+      <p class="tiny" id="setLangNote" style="margin-top:10px"></p>
+    </div>
+
+    <div class="card">
+      <h3 id="setAiTitle">Conversation</h3>
+      <p class="muted" id="setAiHint"></p>
+      <label id="lbRelay">Connection address</label>
+      <input id="relayUrl" type="url" inputmode="url" placeholder="https://....workers.dev">
+      <div class="row2" style="margin-top:12px">
+        <button class="btn green small" onclick="saveRelay()"><span class="ic">✔</span><span class="sv">Save</span></button>
+        <button class="btn ghost small" onclick="testRelay()"><span class="ic">🔌</span><span id="setTest">Test</span></button>
+      </div>
+      <div id="relayStatus" style="margin-top:12px"></div>
+      <p class="tiny" id="setAiNote" style="margin-top:10px"></p>
+    </div>
+
+    <div class="card">
+      <h3 id="setBackupTitle">Backup and restore</h3>
+      <p class="muted" id="setBackupHint"></p>
+      <button class="btn green small" onclick="exportData()"><span class="ic">💾</span><span id="setExport">Save a backup file</span></button>
+      <button class="btn ghost small" onclick="document.getElementById('importFile').click()"><span class="ic">📂</span><span id="setImport">Restore from a backup file</span></button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div class="card">
+      <h3 id="setNoticeTitle">Important notice</h3>
+      <div class="notice" id="disclaimerText"></div>
+      <button class="btn ghost small" onclick="go('home')"><span class="ic">←</span><span id="setBack">Back to home</span></button>
+    </div>
+
+    <div class="card">
+      <h3 id="setAboutTitle">About</h3>
+      <p class="tiny" id="aboutText"></p>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span id="footTxt">All information stays on this device.</span><br>Mind Companion v1.4
   </div>
 </div>
 
-<!-- ============ APP ============ -->
-<div id="app" style="display:none">
-
-  <div class="topbar" id="topbar" style="display:none">
-    <div class="topbar-in">
-      <button class="tb-back" id="tbBack" onclick="goBack()" style="display:none">‹</button>
-      <div class="tb-title" id="tbTitle">Compass</div>
-      <div class="tb-spacer"></div>
-      <button class="tb-lock" onclick="lockNow()">🔒 Lock</button>
-    </div>
+<nav>
+  <div class="navinner">
+    <button class="navbtn" data-v="home" aria-current="page" onclick="go('home')"><span class="ic">🏠</span><span class="nl">Home</span></button>
+    <button class="navbtn" data-v="meds" onclick="go('meds')"><span class="ic">💊</span><span class="nl">Medicine</span></button>
+    <button class="navbtn" data-v="contacts" onclick="go('contacts')"><span class="ic">📞</span><span class="nl">Contacts</span></button>
+    <button class="navbtn" data-v="notes" onclick="go('notes')"><span class="ic">📝</span><span class="nl">Notes</span></button>
+    <button class="navbtn" data-v="well" onclick="go('well')"><span class="ic">💚</span><span class="nl">Mind</span></button>
+    <button class="navbtn" data-v="sos" onclick="go('sos')"><span class="ic">🚑</span><span class="nl">Help</span></button>
   </div>
+</nav>
 
-  <!-- HOME -->
-  <div class="screen active" id="s-home">
-    <div class="wrap">
-      <div class="home-hero">
-        <div class="eyebrow">Private · On this device</div>
-        <h1>You don't have to be sure to start paying attention.</h1>
-        <p>Sometimes something feels off long before you can name it. This is a quiet place to notice, record, and — when you're ready — understand what's happening and what your options are.</p>
-        <div class="safety"><b>If you're in immediate danger, call 911.</b> For 24/7 confidential support, the DoD Safe Helpline is 877-995-5247.</div>
-      </div>
-
-      <div id="patternSlot"></div>
-
-      <div class="tiles">
-        <button class="tile" onclick="startRecognition()">
-          <div class="tile-ico ico-sea">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3.5-3.5"/></svg>
-          </div>
-          <div>
-            <h3>Was that okay?</h3>
-            <p>Not sure if something crossed a line? Answer a few plain questions — no judgment, no labels. You describe what happened; it helps you see it.</p>
-            <span class="tag">Start here if unsure</span>
-          </div>
-        </button>
-
-        <button class="tile" onclick="show('s-journal')">
-          <div class="tile-ico ico-amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16a1 1 0 0 0 1 1h15"/><path d="M8 7h9M8 11h9M8 15h6"/></svg>
-          </div>
-          <div>
-            <h3>Record & timeline</h3>
-            <p>Keep a dated record of moments, words, and how you felt. One entry means little; a timeline can reveal a pattern.</p>
-            <span class="tag" id="entryCountTag">No entries yet</span>
-          </div>
-        </button>
-
-        <button class="tile" onclick="show('s-learn')">
-          <div class="tile-ico ico-sand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/></svg>
-          </div>
-          <div>
-            <h3>Know the signs</h3>
-            <p>How grooming, boundary-testing, and exclusion actually work — so an approach that felt "normal" becomes recognizable.</p>
-          </div>
-        </button>
-
-        <button class="tile" onclick="show('s-fear')">
-          <div class="tile-ico ico-ink">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg>
-          </div>
-          <div>
-            <h3>Afraid to speak up?</h3>
-            <p>Worried it could cost you your career, or that you'd be doing it alone? That fear is real — and it's worth reading this before you decide anything.</p>
-            <span class="tag">You won't be doing it alone</span>
-          </div>
-        </button>
-
-        <button class="tile" onclick="show('s-report')">
-          <div class="tile-ico ico-ink">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.5V4z"/><path d="M8 9h8M8 12h5"/></svg>
-          </div>
-          <div>
-            <h3>Your options</h3>
-            <p>Reporting pathways for the U.S. Armed Forces — SAPR, EO, and IG — in plain language, plus what each one means for you.</p>
-          </div>
-        </button>
-
-        <button class="tile" onclick="show('s-recover')">
-          <div class="tile-ico ico-sea">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
-          </div>
-          <div>
-            <h3>Recovery & staying yourself</h3>
-            <p>Reporting deals with what was done to you. This is about not letting it harden you — so the person you become is still someone you'd want to be.</p>
-          </div>
-        </button>
-      </div>
-
-      <div class="footer-note">
-        <b>Compass — Courage, Ownership, Memory, Protection, and Self-worth Support.</b> Everything stays on this device. A personal record here supports your memory — it does not replace an official report. To formally preserve evidence, a SARC can guide that process.
-      </div>
-    </div>
+<!-- counseling summary -->
+<div class="modal" id="sumModal">
+  <div class="modalbox">
+    <h2 id="sumTitle"></h2>
+    <div id="sumBody"></div>
+    <button class="btn ghost" onclick="document.getElementById('sumModal').classList.remove('on')"><span class="ic">✕</span><span id="sumCloseLbl">Close</span></button>
   </div>
-
-  <!-- RECOGNITION -->
-  <div class="screen" id="s-recog">
-    <div class="wrap"><div class="rq" id="rqHost"></div></div>
-  </div>
-
-  <!-- JOURNAL LIST -->
-  <div class="screen" id="s-journal">
-    <div class="wrap">
-      <div class="content">
-        <p class="lede">Facts don't require certainty. Write what happened and how your body felt — you can make sense of it later.</p>
-        <button class="btn" onclick="newEntry()">+ New record</button>
-        <div class="filter-row" id="filterRow"></div>
-        <div id="entryList"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ENTRY EDITOR -->
-  <div class="screen" id="s-entry">
-    <div class="wrap"><div class="content" id="entryHost"></div></div>
-  </div>
-
-  <!-- LEARN -->
-  <div class="screen" id="s-learn">
-    <div class="wrap"><div class="content" id="learnHost"></div></div>
-  </div>
-
-  <!-- REPORT -->
-  <div class="screen" id="s-report">
-    <div class="wrap"><div class="content" id="reportHost"></div></div>
-  </div>
-
-  <!-- FEAR / BEFORE YOU SPEAK -->
-  <div class="screen" id="s-fear">
-    <div class="wrap"><div class="content" id="fearHost"></div></div>
-  </div>
-
-  <!-- RECOVERY -->
-  <div class="screen" id="s-recover">
-    <div class="wrap"><div class="content" id="recoverHost"></div></div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="screen" id="s-settings">
-    <div class="wrap"><div class="content" id="settingsHost"></div></div>
-  </div>
-
 </div>
 
-<button class="quick-exit" id="quickExit" onclick="quickExit()">Quick exit ✕</button>
+<!-- first-run notice -->
+<div class="modal" id="firstRun">
+  <div class="modalbox">
+    <h2 id="frTitle">Before you start</h2>
+    <div class="notice" id="frText" style="margin-bottom:16px"></div>
+    <button class="btn green" onclick="acceptNotice()"><span class="ic">✔</span><span id="frOk">I understand</span></button>
+  </div>
+</div>
 
-<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
-<div class="toast" id="toast"></div>
+<div class="sr" aria-live="polite" id="live"></div>
 
 <script>
-/* =========================================================
-   COMPASS — offline, single-file. All data in localStorage.
-   No network calls anywhere. PIN gate + optional quick-exit.
-   ========================================================= */
-const DB_KEY='compass.v1';
-let db=load();
-let nav=['s-home'];
-let pinBuf='', pinMode='enter', pinTmp='';
+/* =====================================================================
+   Mind Companion v1.4
+   A private, offline-first memory aid for older adults.
+   Default language: English. Korean, Spanish, and Japanese available in Settings.
+   v1.4: Mind Wellness section — daily mood log, two-question mind check,
+         counseling summary page, and counseling contact.
+   Storage: artifact storage -> localStorage -> memory.
+   ===================================================================== */
 
-function load(){
-  try{const r=localStorage.getItem(DB_KEY); if(r) return JSON.parse(r);}catch(e){}
-  return {pin:null, entries:[], recog:[], settings:{quickExit:true, decoy:false}};
-}
-function save(){ try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){ toast('Could not save — storage may be full'); } }
+const APP_VERSION = '1.4';
 
-/* ---------- PIN / LOCK ---------- */
-function buildKeys(){
-  const host=document.getElementById('keys'); host.innerHTML='';
-  const layout=[1,2,3,4,5,6,7,8,9,'x',0,'ok'];
-  layout.forEach(k=>{
-    const b=document.createElement('button');
-    if(k==='x'){ b.className='key fn'; b.textContent='⌫'; b.onclick=()=>{pinBuf=pinBuf.slice(0,-1);drawDots();}; }
-    else if(k==='ok'){ b.className='key fn'; b.textContent='OK'; b.onclick=submitPin; }
-    else { b.className='key'; b.textContent=k; b.onclick=()=>{ if(pinBuf.length<8){pinBuf+=k;drawDots(); if(pinBuf.length>=4&&db.pin&&pinMode==='enter')setTimeout(submitPin,120);} }; }
-    host.appendChild(b);
-  });
-}
-function drawDots(err){
-  const d=document.getElementById('pinDots'); d.innerHTML='';
-  const n=Math.max(pinBuf.length,4);
-  for(let i=0;i<n;i++){const s=document.createElement('span');s.className='pin-dot'+(i<pinBuf.length?' on':'')+(err?' err':'');d.appendChild(s);}
-}
-function submitPin(){
-  if(pinMode==='set'){
-    if(pinBuf.length<4){toast('Use at least 4 digits');return;}
-    pinTmp=pinBuf; pinBuf=''; pinMode='confirm';
-    document.getElementById('lockTitle').textContent='Confirm PIN';
-    document.getElementById('lockSub').textContent='Enter it once more';
-    drawDots(); return;
+/* ---------------- storage layer ---------------- */
+const mem = {};
+const store = {
+  async get(k){
+    try{
+      if (window.storage && window.storage.get){
+        const r = await window.storage.get(k,false);
+        return r && r.value ? JSON.parse(r.value) : null;
+      }
+    }catch(e){}
+    try{
+      const v = localStorage.getItem('mc:'+k);
+      return v ? JSON.parse(v) : (mem[k] ?? null);
+    }catch(e){ return mem[k] ?? null; }
+  },
+  async set(k,v){
+    mem[k]=v;
+    const s = JSON.stringify(v);
+    try{
+      if (window.storage && window.storage.set){ await window.storage.set(k,s,false); return; }
+    }catch(e){}
+    try{ localStorage.setItem('mc:'+k,s); }catch(e){}
   }
-  if(pinMode==='confirm'){
-    if(pinBuf===pinTmp){ db.pin=pinBuf; save(); pinBuf=''; openApp(); }
-    else { drawDots(true); toast("PINs didn't match — start over"); pinBuf='';pinTmp='';pinMode='set';
-      document.getElementById('lockTitle').textContent='Set a PIN';
-      document.getElementById('lockSub').textContent='Choose 4–8 digits';
-      setTimeout(drawDots,500); }
-    return;
-  }
-  // enter mode
-  if(pinBuf===db.pin){ pinBuf=''; openApp(); }
-  else { drawDots(true); const d=document.getElementById('pinDots'); navigator.vibrate&&navigator.vibrate(120);
-    setTimeout(()=>{pinBuf='';drawDots();},450); }
-}
-function lockNow(){
-  document.getElementById('app').style.display='none';
-  const l=document.getElementById('lock'); l.classList.add('active');
-  document.getElementById('quickExit').classList.remove('show');
-  pinBuf=''; pinMode='enter';
-  document.getElementById('lockTitle').textContent='Compass';
-  document.getElementById('lockSub').textContent='Enter your PIN to open';
-  drawDots();
-}
-function openApp(){
-  document.getElementById('lock').classList.remove('active');
-  document.getElementById('app').style.display='block';
-  document.getElementById('topbar').style.display='block';
-  if(db.settings.quickExit) document.getElementById('quickExit').classList.add('show');
-  refreshHome();
-}
-function quickExit(){ location.replace('https://www.weather.gov/'); }
+};
 
-/* ---------- NAV ---------- */
-function show(id, push=true){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(push && nav[nav.length-1]!==id) nav.push(id);
-  const back=document.getElementById('tbBack');
-  back.style.display = id==='s-home' ? 'none':'flex';
-  const titles={'s-home':'Compass','s-recog':'Was that okay?','s-journal':'Record & timeline',
-    's-entry':'Record','s-learn':'Know the signs','s-report':'Your options','s-settings':'Settings',
-    's-fear':'Afraid to speak up?','s-recover':'Recovery & staying yourself'};
-  document.getElementById('tbTitle').textContent=titles[id]||'Compass';
-  window.scrollTo(0,0);
-  if(id==='s-journal') renderJournal();
-  if(id==='s-learn') renderLearn();
-  if(id==='s-report') renderReport();
-  if(id==='s-fear') renderFear();
-  if(id==='s-recover') renderRecover();
-  if(id==='s-settings') renderSettings();
-}
-function goBack(){ if(nav.length>1){nav.pop(); show(nav[nav.length-1],false);} }
-function goHome(){ nav=['s-home']; show('s-home',false); }
+/* ---------------- state ---------------- */
+let DB = { meds:[], contacts:[], notes:[], taken:{}, me:{}, lang:'en', scale:1, agreed:false, relayUrl:'', mood:{}, checks:[], counselor:{} };
 
-/* ---------- HOME ---------- */
-function refreshHome(){
-  const n=db.entries.length;
-  document.getElementById('entryCountTag').textContent = n===0?'No entries yet':(n+' entr'+(n===1?'y':'ies')+' recorded');
-  renderPatternAlert();
+/* short-lived conversation memory (this session only, never saved) */
+let convo = [];
+
+async function load(){
+  const d = await store.get('data');
+  if (d) DB = Object.assign(DB,d);
+  document.documentElement.style.setProperty('--scale', DB.scale||1);
 }
-function renderPatternAlert(){
-  const slot=document.getElementById('patternSlot'); slot.innerHTML='';
-  const p=detectPatterns();
-  if(!p) return;
-  const div=document.createElement('div'); div.className='pattern-alert';
-  div.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-    <div><h4>${p.title}</h4><p>${p.body}</p><button onclick="show('s-journal')">Review the timeline →</button></div>`;
-  slot.appendChild(div);
-}
-/* pattern logic: repetition by person, or by category, or escalation over time */
-function detectPatterns(){
-  const e=db.entries; if(e.length<2) return null;
-  const byPerson={}, byCat={};
-  e.forEach(x=>{ if(x.person){const k=x.person.trim().toLowerCase(); if(k) byPerson[k]=(byPerson[k]||0)+1;} byCat[x.cat]=(byCat[x.cat]||0)+1; });
-  for(const k in byPerson){ if(byPerson[k]>=3){
-    const name=e.find(x=>x.person&&x.person.trim().toLowerCase()===k).person;
-    return {title:'A repeating pattern', body:`The same person — ${escapeHtml(name)} — appears in ${byPerson[k]} of your records. Repetition is often what separates a one-time misunderstanding from a pattern worth acting on.`};
-  }}
-  for(const c in byCat){ if(byCat[c]>=3 && c!=='ot'){
-    const label={sh:'possible sexual misconduct',ha:'harassment or bullying',di:'discrimination',re:'possible reprisal'}[c]||'this type';
-    return {title:'This keeps happening', body:`You've recorded ${byCat[c]} moments related to ${label}. When something recurs, it's less likely to be "just you being sensitive."`};
-  }}
-  return null;
+async function save(){ await store.set('data',DB); }
+
+/* ---------------- i18n ---------------- */
+const T = {
+en:{
+  htmlLang:'en', voice:'en-US', sizeBtn:'A',
+  greetM:'Good morning', greetA:'Hello', greetE:'Good evening',
+  micIdle:'Press and speak', micLive:'Listening… press again to stop',
+  heardLbl:'I heard', replyLbl:'Answer', typeAsk:'Type a question instead',
+  todayMed:"Today's medicine", medsTitle:'💊 Medicine', medsHint:'Tap the big square when you have taken it.',
+  addMed:'Add medicine', mName:'Medicine name', mTime:'When to take', mNote:'Note (optional)',
+  medDisclaim:'This list is a reminder only. It does not send alarms and does not replace instructions from your doctor or pharmacist.',
+  contactsTitle:'📞 Contacts', contactsHint:'Press the green button to call right away.',
+  addContact:'Add contact', cName:'Name', cPhone:'Phone number', cRole:'Relationship / role',
+  notesTitle:'📝 Memory notes', notesHint:'Write down where things are, hints, or anything important — then ask by voice.',
+  voiceNote:'Speak to write', addNote:'Type to write', nTitle:'Title (the word you will ask for)', nBody:'Details',
+  sosTitle:'🚑 Get help', sosHint:'Press the big button in an emergency.', call911:'Call 911',
+  sosSetHint:'Contacts saved as family appear here.',
+  myInfo:'My information (show to paramedics)', editMe:'Edit my information',
+  meName:'Name', meAddr:'Address', meCond:'Conditions · allergies', meBlood:'Blood type',
+  save:'Save', cancel:'Cancel', foot:'All information stays on this device.',
+  nav:['Home','Medicine','Contacts','Notes','Mind','Help'],
+  times:{morning:'Morning',noon:'Noon',evening:'Evening',night:'Bedtime'},
+  roles:{family:'Family',doctor:'Doctor · clinic',pharmacy:'Pharmacy',repair:'Repair · service',friend:'Friend · neighbor',other:'Other'},
+  ph:{medName:'e.g., Blood pressure pill', medNote:'e.g., 30 minutes after a meal',
+      cName:'e.g., Jieun (daughter)', cPhone:'210-555-0100',
+      nTitle:'e.g., Passport', nBody:'e.g., Second drawer of the bedroom dresser',
+      meName:'Full name', meAddr:'Home address',
+      meCond:'e.g., High blood pressure, penicillin allergy', meBlood:'e.g., O+'},
+  noMeds:'No medicine added yet. Add one below.',
+  noContacts:'No contacts yet.',
+  noNotes:'Nothing written yet. Try speaking a note.',
+  noSos:'Please add a family contact first.',
+  noMe:'No information yet.',
+  allTaken:'You have taken all of today\u2019s medicine. Well done.',
+  medLeft:n=>`${n} still to take.`,
+  askPrompt:'What would you like to know?',
+  notFound:'I do not know that yet. Write it in Notes and I will remember it next time.',
+  sttNo:'This browser does not support voice input. Please use Chrome or Safari, or press "Type a question instead" below.',
+  sttDenied:'Microphone access was blocked. Please allow the microphone in your browser settings.',
+  sttNoSpeech:'I did not hear anything. Press the button and speak again.',
+  sttNet:'An internet connection is needed. Please check your connection.',
+  confirmDel:'Delete this?',
+  noteSaved:'Written down.', savedShort:'Saved.',
+  needName:'Please enter a name.', needPhone:'Please enter a phone number.',
+  medTakenSay:n=>`Marked ${n} as taken.`,
+  answerMedYes:'You have taken all your medicine today.',
+  answerMedNo:list=>`You have not taken ${list} yet.`,
+  answerCall:(n,p)=>`${n}, ${p}. Press the green button on the Contacts screen to call.`,
+  today:'Today is',
+  /* settings */
+  setTitle:'⚙️ Settings', setHint:'These settings are usually set up once by a family member.',
+  setTextTitle:'Text size', setTextBtn:'Make text larger',
+  setLangTitle:'Language', setLangNote:'Changing the language also changes the voice used for listening and speaking.',
+  setBackupTitle:'Backup and restore',
+  setBackupHint:'Information is stored only on this device. If the browser data is cleared or the phone is replaced, it will be lost. Save a backup file and keep it somewhere safe.',
+  setExport:'Save a backup file', setImport:'Restore from a backup file',
+  setNoticeTitle:'Important notice', setBack:'Back to home', setAboutTitle:'About',
+  about:`Mind Companion v${APP_VERSION} · Works offline · No account, no tracking, no data sent anywhere.`,
+  frTitle:'Before you start', frOk:'I understand',
+  disclaimer:'Mind Companion is a personal memory aid. It is not a medical device and does not give medical advice. It does not sound alarms and must not be relied on as a medication reminder. Always follow the instructions of your doctor or pharmacist. In an emergency, call 911 or your local emergency number. Information is stored only on this device; if browser data is cleared, it will be lost.',
+  exportOk:'Backup file saved.',
+  importAsk:'Restore this backup? Everything currently in the app will be replaced.',
+  importOk:'Backup restored.', importBad:'That file could not be read. Please choose a Mind Companion backup file.',
+  /* conversation */
+  exLbl:'You can ask me things like:',
+  examples:['What day is it today?','Did I take my medicine?','Who is my doctor?'],
+  thinking:'One moment…',
+  greetBack:'Good morning.', greetBackA:'Hello.', greetBackE:'Good evening.',
+  howAreYou:'I am doing well, thank you. How are you feeling today?',
+  thanks:'You are very welcome.',
+  notSure:'I am not sure about that one. You can ask me what day it is, whether you took your medicine, or who your doctor is.',
+  setAiTitle:'Conversation',
+  setAiHint:'With a connection address, the app can hold a real conversation instead of only answering set questions.',
+  lbRelay:'Connection address', setTest:'Test',
+  setAiNote:'Leave this empty to use the app without a connection. It will still answer questions about the day, medicine, contacts, and notes.',
+  relayOk:'Connected. Conversation is on.',
+  relayBad:'Could not reach that address. Please check it and try again.',
+  relayCleared:'Connection removed. The app will use its built-in answers.',
+  relaySaved:'Saved.',
+  aiFail:'I could not connect just now, so I will answer from what is saved here.',
+  /* mind wellness */
+  wTitle:'💚 My mind', wHint:'A small daily note of how you are feeling. You can show it at counseling.',
+  wMoodTitle:'How is your mood today?',
+  moodLabels:['Very good','Good','Okay','A bit low','Very hard'],
+  wMoodSaved:'Thank you. I wrote down how you feel today.',
+  wCheckTitle:'Mind check', wCheckHint:'Two short questions about the last two weeks. This is not a test — there are no wrong answers.',
+  wStart:'Answer the two questions',
+  q1:'Over the last two weeks, how often have you felt down, depressed, or hopeless?',
+  q2:'Over the last two weeks, how often have you felt little interest or pleasure in doing things?',
+  opts:['Not at all','Several days','More than half the days','Nearly every day'],
+  wResultLow:'Thank you for answering. Your mind seems to be doing okay. Checking in like this now and then is a good habit.',
+  wResultHigh:'Thank you for answering. It sounds like your heart has been heavy lately. Talking with the counselor can really help — the counseling contact is below.',
+  wCrisis:'If it ever feels like too much, you can call or text 988 at any time, day or night. A kind person will listen.',
+  wDisclaim:'This check is a simple self-reflection, not a medical test or a diagnosis. If you are worried about your mood, please talk with your counselor or doctor.',
+  wShareTitle:'Show at counseling', wShareHint:'One page with your recent moods and answers, in large text.', wShareBtn:'Open the summary page',
+  wCounselorTitle:'Counseling contact', wCounselorHint:'Your counselor\'s information will appear here. A family member or staff can add it.',
+  wcName:'Counselor name', wcOrg:'Organization / clinic', wcPhone:'Phone number', wEditC:'Edit counseling contact',
+  noCounselorTxt:'The counseling contact has not been added yet.',
+  wSummaryTitle:'My recent mind (last 4 weeks)',
+  wMoodSec:'Daily mood', wCheckSec:'Mind check answers',
+  checkScore:n=>`Check result ${n} / 6`,
+  wNoData:'Nothing recorded yet.',
+  wClose:'Close',
+  sysPrompt:`You are a warm, patient companion for an older adult who may have memory difficulty. You are speaking through a phone app; your reply is read aloud.
+
+HOW TO SPEAK
+- Short sentences. One idea at a time. Two or three sentences at most.
+- Plain, everyday words. No lists, no bullet points, no formatting marks — your text is spoken aloud.
+- Calm and kind, never rushed, never patronising. Speak to an adult, not a child.
+- If the same question is asked again, answer again as if for the first time. Never say "you already asked" or "as I said".
+- If the person seems confused or upset, be reassuring first and keep the answer very simple.
+
+WHAT YOU KNOW
+- Personal facts come only from the saved information given to you below. Never invent a name, phone number, address, or medicine.
+- If something is not in the saved information, say kindly that it is not written down, and suggest adding it to Notes.
+- General everyday questions, conversation, and companionship are welcome. Answer those naturally.
+
+SAFETY — THIS MATTERS MOST
+- You are not a doctor or a nurse. Never diagnose, never advise on taking, skipping, changing, or combining medicine, never interpret symptoms.
+- For anything about health, symptoms, pain, or medicine decisions, warmly direct them to their doctor or pharmacist.
+- If they describe chest pain, trouble breathing, weakness on one side, a fall, bleeding, or anything that sounds like an emergency, tell them plainly to call 911 right now, and mention the red Help button in the app.
+- If they sound lonely, sad, or frightened, listen and be kind, and gently suggest calling a family member.`
+},
+ko:{
+  htmlLang:'ko', voice:'ko-KR', sizeBtn:'가',
+  greetM:'좋은 아침입니다', greetA:'안녕하세요', greetE:'좋은 저녁입니다',
+  micIdle:'눌러서 말하기', micLive:'듣고 있습니다… 다시 누르면 끝',
+  heardLbl:'들은 내용', replyLbl:'대답', typeAsk:'글자로 물어보기',
+  todayMed:'오늘 먹을 약', medsTitle:'💊 약', medsHint:'먹은 약은 큰 네모를 눌러 표시하세요.',
+  addMed:'약 추가', mName:'약 이름', mTime:'먹는 시간', mNote:'메모 (선택)',
+  medDisclaim:'이 목록은 참고용 기록일 뿐입니다. 알람이 울리지 않으며, 의사·약사의 지시를 대신하지 않습니다.',
+  contactsTitle:'📞 연락처', contactsHint:'초록 버튼을 누르면 바로 전화가 걸립니다.',
+  addContact:'연락처 추가', cName:'이름', cPhone:'전화번호', cRole:'관계 / 역할',
+  notesTitle:'📝 기억 노트', notesHint:'물건 둔 곳, 비밀번호 힌트, 중요한 일을 적어두면 음성으로 찾을 수 있습니다.',
+  voiceNote:'말해서 적기', addNote:'글자로 적기', nTitle:'제목 (찾을 때 쓰는 말)', nBody:'내용',
+  sosTitle:'🚑 도움 요청', sosHint:'위급할 때 큰 버튼을 누르세요.', call911:'911 전화',
+  sosSetHint:'가족으로 저장된 연락처가 여기에 나옵니다.',
+  myInfo:'내 정보 (구급대원에게 보여주세요)', editMe:'내 정보 수정',
+  meName:'이름', meAddr:'주소', meCond:'지병 · 알레르기', meBlood:'혈액형',
+  save:'저장', cancel:'취소', foot:'모든 정보는 이 기기 안에만 저장됩니다.',
+  nav:['홈','약','연락처','노트','마음','도움'],
+  times:{morning:'아침',noon:'점심',evening:'저녁',night:'자기 전'},
+  roles:{family:'가족',doctor:'의사 · 병원',pharmacy:'약국',repair:'수리 · 서비스',friend:'친구 · 이웃',other:'기타'},
+  ph:{medName:'예: 혈압약', medNote:'예: 식후 30분',
+      cName:'예: 큰딸 지은', cPhone:'210-555-0100',
+      nTitle:'예: 여권', nBody:'예: 안방 서랍장 두 번째 칸',
+      meName:'이름', meAddr:'집 주소',
+      meCond:'예: 고혈압, 페니실린 알레르기', meBlood:'예: O+'},
+  noMeds:'등록된 약이 없습니다. 아래에서 추가하세요.',
+  noContacts:'등록된 연락처가 없습니다.',
+  noNotes:'적어둔 것이 없습니다. 말해서 적어보세요.',
+  noSos:'가족 연락처를 먼저 추가해 주세요.',
+  noMe:'아직 정보가 없습니다.',
+  allTaken:'오늘 약을 모두 드셨습니다. 잘하셨습니다.',
+  medLeft:n=>`아직 ${n}개 남았습니다.`,
+  askPrompt:'무엇이 궁금하신가요?',
+  notFound:'그건 아직 모릅니다. 노트에 적어두시면 다음부터 기억하겠습니다.',
+  sttNo:'이 브라우저는 음성 인식을 지원하지 않습니다. 크롬(Chrome) 또는 사파리(Safari)를 사용하시고, 아래 «글자로 물어보기»를 눌러 주세요.',
+  sttDenied:'마이크 사용이 허용되지 않았습니다. 브라우저 설정에서 마이크를 허용해 주세요.',
+  sttNoSpeech:'소리가 들리지 않았습니다. 버튼을 다시 누르고 말씀해 주세요.',
+  sttNet:'인터넷 연결이 필요합니다. 연결을 확인해 주세요.',
+  confirmDel:'정말 지울까요?',
+  noteSaved:'적었습니다.', savedShort:'저장했습니다.',
+  needName:'이름을 적어 주세요.', needPhone:'전화번호를 적어 주세요.',
+  medTakenSay:n=>`${n} 드신 것으로 표시했습니다.`,
+  answerMedYes:'오늘 약은 모두 드셨습니다.',
+  answerMedNo:list=>`아직 ${list} 안 드셨습니다.`,
+  answerCall:(n,p)=>`${n}, ${p} 입니다. 연락처 화면에서 초록 버튼을 누르시면 전화가 걸립니다.`,
+  today:'오늘은',
+  setTitle:'⚙️ 설정', setHint:'보통 가족이 처음에 한 번 설정해 드리는 항목입니다.',
+  setTextTitle:'글자 크기', setTextBtn:'글자 크게 하기',
+  setLangTitle:'언어', setLangNote:'언어를 바꾸면 음성 인식과 음성 안내 언어도 함께 바뀝니다.',
+  setBackupTitle:'백업 및 복원',
+  setBackupHint:'정보는 이 기기에만 저장됩니다. 브라우저 데이터를 지우거나 휴대폰을 바꾸면 사라집니다. 백업 파일을 저장해 안전한 곳에 보관하세요.',
+  setExport:'백업 파일 저장', setImport:'백업 파일에서 복원',
+  setNoticeTitle:'중요 안내', setBack:'홈으로', setAboutTitle:'앱 정보',
+  about:`Mind Companion v${APP_VERSION} · 오프라인 작동 · 계정 없음, 추적 없음, 외부 전송 없음.`,
+  frTitle:'시작하기 전에', frOk:'확인했습니다',
+  disclaimer:'Mind Companion은 기억을 돕는 보조 도구입니다. 의료기기가 아니며 의학적 조언을 제공하지 않습니다. 알람이 울리지 않으므로 복약 알림 수단으로 의존하면 안 됩니다. 반드시 의사·약사의 지시를 따르십시오. 응급 상황에서는 911 또는 지역 응급번호로 전화하십시오. 정보는 이 기기에만 저장되며, 브라우저 데이터를 지우면 사라집니다.',
+  exportOk:'백업 파일을 저장했습니다.',
+  importAsk:'이 백업으로 복원할까요? 현재 앱에 있는 내용은 모두 교체됩니다.',
+  importOk:'복원했습니다.', importBad:'파일을 읽을 수 없습니다. Mind Companion 백업 파일을 선택해 주세요.',
+  exLbl:'이런 것을 물어보실 수 있습니다:',
+  examples:['오늘 며칠이지?','약 먹었나?','내 주치의가 누구지?'],
+  thinking:'잠시만요…',
+  greetBack:'좋은 아침입니다.', greetBackA:'안녕하세요.', greetBackE:'좋은 저녁입니다.',
+  howAreYou:'저는 잘 있습니다. 오늘 몸은 어떠신가요?',
+  thanks:'천만에요.',
+  notSure:'그건 잘 모르겠습니다. 오늘 날짜, 약을 드셨는지, 주치의가 누구인지 물어보실 수 있습니다.',
+  setAiTitle:'대화',
+  setAiHint:'연결 주소를 넣으면 정해진 질문만이 아니라 실제 대화를 나눌 수 있습니다.',
+  lbRelay:'연결 주소', setTest:'연결 확인',
+  setAiNote:'비워 두어도 앱은 작동합니다. 날짜, 약, 연락처, 노트에 대한 답은 그대로 됩니다.',
+  relayOk:'연결되었습니다. 대화 기능이 켜졌습니다.',
+  relayBad:'주소에 연결할 수 없습니다. 주소를 확인하고 다시 시도해 주세요.',
+  relayCleared:'연결을 해제했습니다. 기본 답변만 사용합니다.',
+  relaySaved:'저장했습니다.',
+  aiFail:'지금은 연결이 되지 않아, 저장된 내용으로만 답해 드리겠습니다.',
+  /* mind wellness */
+  wTitle:'💚 마음', wHint:'오늘 기분을 간단히 기록합니다. 상담받을 때 보여드릴 수 있습니다.',
+  wMoodTitle:'오늘 기분이 어떠세요?',
+  moodLabels:['아주 좋아요','좋아요','그저 그래요','조금 힘들어요','많이 힘들어요'],
+  wMoodSaved:'고맙습니다. 오늘 기분을 적어 두었습니다.',
+  wCheckTitle:'마음 점검', wCheckHint:'지난 2주에 대한 짧은 질문 두 가지입니다. 시험이 아니니 편하게 답하세요.',
+  wStart:'두 가지 질문에 답하기',
+  q1:'지난 2주 동안, 기분이 가라앉거나 우울하거나 희망이 없다고 느낀 적이 얼마나 자주 있었나요?',
+  q2:'지난 2주 동안, 일에 흥미나 즐거움이 없었던 적이 얼마나 자주 있었나요?',
+  opts:['전혀 없었다','며칠 있었다','2주의 절반 이상','거의 매일'],
+  wResultLow:'답해 주셔서 고맙습니다. 마음이 비교적 잘 지내고 계신 것 같습니다. 가끔 이렇게 살펴보는 것이 좋은 습관입니다.',
+  wResultHigh:'답해 주셔서 고맙습니다. 요즘 마음이 많이 무거우신 것 같습니다. 상담 선생님과 이야기 나누시면 큰 도움이 됩니다. 아래 상담 연락처를 눌러 보세요.',
+  wCrisis:'마음이 너무 힘들 때는 밤낮 언제든 988로 전화하거나 문자할 수 있습니다. 한국어 통역도 됩니다.',
+  wDisclaim:'이 점검은 간단한 자기 살핌이며, 의학적 검사나 진단이 아닙니다. 마음이 걱정되시면 상담 선생님이나 의사와 이야기해 주세요.',
+  wShareTitle:'상담 때 보여드리기', wShareHint:'최근 기분과 답변을 큰 글씨 한 화면으로 정리합니다.', wShareBtn:'정리 화면 열기',
+  wCounselorTitle:'상담 연락처', wCounselorHint:'상담 선생님의 정보가 여기에 표시됩니다. 가족이나 담당자가 넣어 드립니다.',
+  wcName:'상담 선생님 성함', wcOrg:'소속 / 기관', wcPhone:'전화번호', wEditC:'상담 연락처 입력',
+  noCounselorTxt:'상담 연락처가 아직 등록되지 않았습니다.',
+  wSummaryTitle:'나의 최근 마음 (지난 4주)',
+  wMoodSec:'매일 기분', wCheckSec:'마음 점검 답변',
+  checkScore:n=>`점검 결과 ${n} / 6`,
+  wNoData:'아직 기록이 없습니다.',
+  wClose:'닫기',
+  sysPrompt:`당신은 기억이 예전 같지 않으신 어르신 곁을 지키는 다정하고 인내심 있는 말벗입니다. 휴대폰 앱을 통해 이야기하며, 당신의 답변은 소리로 읽어 드립니다.
+
+말하는 방식
+- 문장은 짧게. 한 번에 한 가지만. 많아야 두세 문장.
+- 쉽고 일상적인 말로. 목록이나 기호는 쓰지 마세요. 소리로 읽히는 글입니다.
+- 차분하고 따뜻하게. 재촉하지 말고, 아이 대하듯 하지 마세요. 어른께 말씀드리는 것입니다.
+- 같은 질문을 다시 하셔도 처음처럼 다시 답하세요. "아까 물어보셨다"는 말은 절대 하지 마세요.
+- 혼란스러워하거나 속상해하시면 먼저 안심시켜 드리고, 답은 아주 간단하게 하세요.
+
+아는 것
+- 개인적인 사실은 아래 저장된 정보에서만 가져오세요. 이름, 전화번호, 주소, 약을 지어내지 마세요.
+- 저장된 정보에 없으면, 적혀 있지 않다고 부드럽게 말씀드리고 노트에 적어두시길 권하세요.
+- 일상적인 질문이나 그냥 나누는 이야기는 환영입니다. 자연스럽게 답하세요.
+
+안전 — 가장 중요합니다
+- 당신은 의사나 간호사가 아닙니다. 진단하지 말고, 약을 먹으라·거르라·바꾸라·같이 먹으라는 말을 절대 하지 말고, 증상을 해석하지 마세요.
+- 건강, 증상, 통증, 약에 관한 판단은 따뜻하게 의사나 약사에게 여쭤보시도록 안내하세요.
+- 가슴 통증, 숨쉬기 힘듦, 한쪽 몸에 힘이 빠짐, 넘어짐, 출혈 등 응급으로 들리는 말씀을 하시면, 지금 바로 911에 전화하시라고 분명히 말씀드리고 앱의 빨간 도움 버튼을 알려 드리세요.
+- 외로워하거나 슬퍼하거나 두려워하시면, 잘 들어드리고 가족에게 전화해 보시라고 부드럽게 권하세요.`
+},
+es:{
+  htmlLang:'es', voice:'es-US', sizeBtn:'A',
+  greetM:'Buenos días', greetA:'Buenas tardes', greetE:'Buenas noches',
+  micIdle:'Presione y hable', micLive:'Escuchando… presione de nuevo para terminar',
+  heardLbl:'Escuché', replyLbl:'Respuesta', typeAsk:'Escribir una pregunta',
+  todayMed:'Medicinas de hoy', medsTitle:'💊 Medicinas', medsHint:'Toque el cuadro grande cuando la haya tomado.',
+  addMed:'Agregar medicina', mName:'Nombre de la medicina', mTime:'Cuándo tomarla', mNote:'Nota (opcional)',
+  medDisclaim:'Esta lista es solo un recordatorio. No suena alarmas y no reemplaza las indicaciones de su médico o farmacéutico.',
+  contactsTitle:'📞 Contactos', contactsHint:'Presione el botón verde para llamar de inmediato.',
+  addContact:'Agregar contacto', cName:'Nombre', cPhone:'Número de teléfono', cRole:'Relación / función',
+  notesTitle:'📝 Notas de memoria', notesHint:'Escriba dónde están las cosas o algo importante — luego pregunte por voz.',
+  voiceNote:'Hablar para escribir', addNote:'Escribir con teclado', nTitle:'Título (la palabra que va a preguntar)', nBody:'Detalles',
+  sosTitle:'🚑 Pedir ayuda', sosHint:'Presione el botón grande en una emergencia.', call911:'Llamar al 911',
+  sosSetHint:'Los contactos guardados como familia aparecen aquí.',
+  myInfo:'Mi información (muéstrela a los paramédicos)', editMe:'Editar mi información',
+  meName:'Nombre', meAddr:'Dirección', meCond:'Enfermedades · alergias', meBlood:'Tipo de sangre',
+  save:'Guardar', cancel:'Cancelar', foot:'Toda la información se guarda solo en este aparato.',
+  nav:['Inicio','Medicinas','Contactos','Notas','Ánimo','Ayuda'],
+  times:{morning:'Mañana',noon:'Mediodía',evening:'Tarde',night:'Antes de dormir'},
+  roles:{family:'Familia',doctor:'Médico · clínica',pharmacy:'Farmacia',repair:'Reparación · servicio',friend:'Amigo · vecino',other:'Otro'},
+  ph:{medName:'ej.: Pastilla para la presión', medNote:'ej.: 30 minutos después de comer',
+      cName:'ej.: María (hija)', cPhone:'210-555-0100',
+      nTitle:'ej.: Pasaporte', nBody:'ej.: Segundo cajón de la cómoda',
+      meName:'Nombre completo', meAddr:'Dirección de casa',
+      meCond:'ej.: Presión alta, alergia a la penicilina', meBlood:'ej.: O+'},
+  noMeds:'Todavía no hay medicinas. Agregue una abajo.',
+  noContacts:'Todavía no hay contactos.',
+  noNotes:'Todavía no hay notas. Pruebe hablar una nota.',
+  noSos:'Primero agregue un contacto de familia.',
+  noMe:'Todavía no hay información.',
+  allTaken:'Ya tomó todas sus medicinas de hoy. Muy bien.',
+  medLeft:n=>`Faltan ${n} por tomar.`,
+  askPrompt:'¿Qué le gustaría saber?',
+  notFound:'Eso todavía no lo sé. Escríbalo en Notas y lo recordaré la próxima vez.',
+  sttNo:'Este navegador no permite hablar. Use Chrome o Safari, o presione «Escribir una pregunta» abajo.',
+  sttDenied:'El micrófono está bloqueado. Permita el micrófono en la configuración del navegador.',
+  sttNoSpeech:'No escuché nada. Presione el botón y hable de nuevo.',
+  sttNet:'Se necesita conexión a internet. Revise su conexión.',
+  confirmDel:'¿Borrar esto?',
+  noteSaved:'Anotado.', savedShort:'Guardado.',
+  needName:'Escriba un nombre, por favor.', needPhone:'Escriba un número de teléfono, por favor.',
+  medTakenSay:n=>`${n} marcada como tomada.`,
+  answerMedYes:'Hoy ya tomó todas sus medicinas.',
+  answerMedNo:list=>`Todavía no ha tomado ${list}.`,
+  answerCall:(n,p)=>`${n}, ${p}. Presione el botón verde en la pantalla de Contactos para llamar.`,
+  today:'Hoy es',
+  setTitle:'⚙️ Configuración', setHint:'Normalmente un familiar configura esto una sola vez.',
+  setTextTitle:'Tamaño de letra', setTextBtn:'Hacer la letra más grande',
+  setLangTitle:'Idioma', setLangNote:'Al cambiar el idioma, también cambia la voz para escuchar y hablar.',
+  setBackupTitle:'Copia de seguridad',
+  setBackupHint:'La información se guarda solo en este aparato. Si se borran los datos del navegador o cambia de teléfono, se perderá. Guarde una copia en un lugar seguro.',
+  setExport:'Guardar copia de seguridad', setImport:'Restaurar desde una copia',
+  setNoticeTitle:'Aviso importante', setBack:'Volver al inicio', setAboutTitle:'Acerca de',
+  about:`Mind Companion v${APP_VERSION} · Funciona sin internet · Sin cuenta, sin rastreo, sin enviar datos.`,
+  frTitle:'Antes de empezar', frOk:'Entendido',
+  disclaimer:'Mind Companion es una ayuda personal para la memoria. No es un dispositivo médico y no da consejos médicos. No suena alarmas y no debe usarse como recordatorio de medicinas. Siga siempre las indicaciones de su médico o farmacéutico. En una emergencia, llame al 911. La información se guarda solo en este aparato; si se borran los datos del navegador, se perderá.',
+  exportOk:'Copia guardada.',
+  importAsk:'¿Restaurar esta copia? Todo lo que hay ahora en la app será reemplazado.',
+  importOk:'Copia restaurada.', importBad:'No se pudo leer ese archivo. Elija un archivo de copia de Mind Companion.',
+  exLbl:'Puede preguntarme cosas como:',
+  examples:['¿Qué día es hoy?','¿Tomé mis medicinas?','¿Quién es mi médico?'],
+  thinking:'Un momento…',
+  greetBack:'Buenos días.', greetBackA:'Buenas tardes.', greetBackE:'Buenas noches.',
+  howAreYou:'Estoy bien, gracias. ¿Cómo se siente usted hoy?',
+  thanks:'Con mucho gusto.',
+  notSure:'No estoy seguro de eso. Puede preguntarme qué día es, si tomó sus medicinas, o quién es su médico.',
+  setAiTitle:'Conversación',
+  setAiHint:'Con una dirección de conexión, la app puede conversar de verdad, no solo responder preguntas fijas.',
+  lbRelay:'Dirección de conexión', setTest:'Probar',
+  setAiNote:'Puede dejarlo vacío. La app seguirá respondiendo sobre el día, las medicinas, los contactos y las notas.',
+  relayOk:'Conectado. La conversación está activada.',
+  relayBad:'No se pudo conectar a esa dirección. Revísela e intente de nuevo.',
+  relayCleared:'Conexión eliminada. La app usará sus respuestas básicas.',
+  relaySaved:'Guardado.',
+  aiFail:'Ahora no me pude conectar, así que responderé con lo que está guardado aquí.',
+  /* mind wellness */
+  wTitle:'💚 Mi ánimo', wHint:'Un pequeño registro diario de cómo se siente. Puede mostrarlo en la consejería.',
+  wMoodTitle:'¿Cómo se siente hoy?',
+  moodLabels:['Muy bien','Bien','Más o menos','Un poco mal','Muy mal'],
+  wMoodSaved:'Gracias. Anoté cómo se siente hoy.',
+  wCheckTitle:'Revisión del ánimo', wCheckHint:'Dos preguntas cortas sobre las últimas dos semanas. No es un examen — no hay respuestas malas.',
+  wStart:'Responder las dos preguntas',
+  q1:'En las últimas dos semanas, ¿con qué frecuencia se ha sentido triste, deprimido o sin esperanza?',
+  q2:'En las últimas dos semanas, ¿con qué frecuencia ha sentido poco interés o placer en hacer las cosas?',
+  opts:['Nunca','Varios días','Más de la mitad de los días','Casi todos los días'],
+  wResultLow:'Gracias por responder. Su ánimo parece estar bien. Revisarlo de vez en cuando es una buena costumbre.',
+  wResultHigh:'Gracias por responder. Parece que su corazón ha estado pesado últimamente. Hablar con el consejero puede ayudar mucho — el contacto de consejería está abajo.',
+  wCrisis:'Si en algún momento se siente muy mal, puede llamar o mandar un texto al 988 a cualquier hora. Una persona amable lo escuchará. También hay atención en español.',
+  wDisclaim:'Esta revisión es una reflexión sencilla, no una prueba médica ni un diagnóstico. Si le preocupa su ánimo, hable con su consejero o su médico.',
+  wShareTitle:'Mostrar en la consejería', wShareHint:'Una página con sus ánimos y respuestas recientes, en letra grande.', wShareBtn:'Abrir la página de resumen',
+  wCounselorTitle:'Contacto de consejería', wCounselorHint:'La información de su consejero aparecerá aquí. Un familiar o el personal puede agregarla.',
+  wcName:'Nombre del consejero', wcOrg:'Organización / clínica', wcPhone:'Número de teléfono', wEditC:'Editar contacto de consejería',
+  noCounselorTxt:'El contacto de consejería todavía no está registrado.',
+  wSummaryTitle:'Mi ánimo reciente (últimas 4 semanas)',
+  wMoodSec:'Ánimo diario', wCheckSec:'Respuestas de la revisión',
+  checkScore:n=>`Resultado ${n} / 6`,
+  wNoData:'Todavía no hay registros.',
+  wClose:'Cerrar'
+},
+ja:{
+  htmlLang:'ja', voice:'ja-JP', sizeBtn:'あ',
+  greetM:'おはようございます', greetA:'こんにちは', greetE:'こんばんは',
+  micIdle:'押して話す', micLive:'聞いています… もう一度押すと終わります',
+  heardLbl:'聞いた内容', replyLbl:'答え', typeAsk:'文字で質問する',
+  todayMed:'今日のお薬', medsTitle:'💊 お薬', medsHint:'飲んだら大きい四角を押してください。',
+  addMed:'お薬を追加', mName:'お薬の名前', mTime:'飲む時間', mNote:'メモ(任意)',
+  medDisclaim:'この一覧は記録のためのものです。アラームは鳴りません。医師・薬剤師の指示に代わるものではありません。',
+  contactsTitle:'📞 連絡先', contactsHint:'緑のボタンを押すと、すぐに電話がかかります。',
+  addContact:'連絡先を追加', cName:'名前', cPhone:'電話番号', cRole:'関係 / 役割',
+  notesTitle:'📝 覚えのノート', notesHint:'物の置き場所や大事なことを書いておくと、声で聞いて探せます。',
+  voiceNote:'話して書く', addNote:'文字で書く', nTitle:'題名(聞くときの言葉)', nBody:'内容',
+  sosTitle:'🚑 助けを呼ぶ', sosHint:'緊急のときは大きいボタンを押してください。', call911:'911に電話',
+  sosSetHint:'家族として保存した連絡先がここに出ます。',
+  myInfo:'私の情報(救急隊員に見せてください)', editMe:'私の情報を直す',
+  meName:'名前', meAddr:'住所', meCond:'持病 · アレルギー', meBlood:'血液型',
+  save:'保存', cancel:'やめる', foot:'すべての情報はこの機器の中だけに保存されます。',
+  nav:['ホーム','お薬','連絡先','ノート','こころ','助け'],
+  times:{morning:'朝',noon:'昼',evening:'夜',night:'寝る前'},
+  roles:{family:'家族',doctor:'医師 · 病院',pharmacy:'薬局',repair:'修理 · サービス',friend:'友人 · 近所',other:'その他'},
+  ph:{medName:'例: 血圧の薬', medNote:'例: 食後30分',
+      cName:'例: 娘のゆき', cPhone:'210-555-0100',
+      nTitle:'例: パスポート', nBody:'例: 寝室のたんすの二段目',
+      meName:'氏名', meAddr:'自宅の住所',
+      meCond:'例: 高血圧、ペニシリンアレルギー', meBlood:'例: O+'},
+  noMeds:'お薬はまだ登録されていません。下から追加してください。',
+  noContacts:'連絡先はまだありません。',
+  noNotes:'まだ何も書かれていません。話して書いてみましょう。',
+  noSos:'まず家族の連絡先を追加してください。',
+  noMe:'まだ情報がありません。',
+  allTaken:'今日のお薬は全部飲みました。よくできました。',
+  medLeft:n=>`あと${n}つ残っています。`,
+  askPrompt:'何をお知りになりたいですか?',
+  notFound:'それはまだ分かりません。ノートに書いておくと、次から覚えています。',
+  sttNo:'このブラウザは音声入力に対応していません。ChromeかSafariをお使いになるか、下の「文字で質問する」を押してください。',
+  sttDenied:'マイクの使用が許可されていません。ブラウザの設定でマイクを許可してください。',
+  sttNoSpeech:'声が聞こえませんでした。ボタンを押して、もう一度お話しください。',
+  sttNet:'インターネット接続が必要です。接続を確認してください。',
+  confirmDel:'これを消しますか?',
+  noteSaved:'書きました。', savedShort:'保存しました。',
+  needName:'名前を書いてください。', needPhone:'電話番号を書いてください。',
+  medTakenSay:n=>`${n}を飲んだことにしました。`,
+  answerMedYes:'今日のお薬は全部飲みました。',
+  answerMedNo:list=>`まだ${list}を飲んでいません。`,
+  answerCall:(n,p)=>`${n}、${p}です。連絡先の画面で緑のボタンを押すと電話がかかります。`,
+  today:'今日は',
+  setTitle:'⚙️ 設定', setHint:'ふつうは最初にご家族が一度だけ設定します。',
+  setTextTitle:'文字の大きさ', setTextBtn:'文字を大きくする',
+  setLangTitle:'言語', setLangNote:'言語を変えると、聞き取りと読み上げの声も変わります。',
+  setBackupTitle:'バックアップと復元',
+  setBackupHint:'情報はこの機器だけに保存されます。ブラウザのデータを消したり機種を替えると消えます。バックアップファイルを安全な場所に保管してください。',
+  setExport:'バックアップを保存', setImport:'バックアップから復元',
+  setNoticeTitle:'大切なお知らせ', setBack:'ホームへ', setAboutTitle:'このアプリについて',
+  about:`Mind Companion v${APP_VERSION} · オフラインで動作 · アカウント不要、追跡なし、外部送信なし。`,
+  frTitle:'はじめる前に', frOk:'分かりました',
+  disclaimer:'Mind Companionは記憶を助ける道具です。医療機器ではなく、医学的な助言もしません。アラームは鳴らないため、服薬の通知として頼らないでください。必ず医師・薬剤師の指示に従ってください。緊急のときは911にお電話ください。情報はこの機器だけに保存され、ブラウザのデータを消すと失われます。',
+  exportOk:'バックアップを保存しました。',
+  importAsk:'このバックアップで復元しますか?今アプリにある内容はすべて置き換わります。',
+  importOk:'復元しました。', importBad:'ファイルを読めませんでした。Mind Companionのバックアップファイルを選んでください。',
+  exLbl:'こんなことを聞けます:',
+  examples:['今日は何日?','薬は飲んだ?','私のお医者さんは誰?'],
+  thinking:'少々お待ちください…',
+  greetBack:'おはようございます。', greetBackA:'こんにちは。', greetBackE:'こんばんは。',
+  howAreYou:'私は元気です。今日のご気分はいかがですか?',
+  thanks:'どういたしまして。',
+  notSure:'それはよく分かりません。今日の日付、薬を飲んだか、お医者さんが誰かを聞いてみてください。',
+  setAiTitle:'会話',
+  setAiHint:'接続アドレスを入れると、決まった質問だけでなく、本当の会話ができます。',
+  lbRelay:'接続アドレス', setTest:'確認',
+  setAiNote:'空のままでも使えます。日付、薬、連絡先、ノートへの答えはそのままできます。',
+  relayOk:'つながりました。会話機能がオンになりました。',
+  relayBad:'そのアドレスにつながりません。確認してもう一度お試しください。',
+  relayCleared:'接続を外しました。基本の答えだけを使います。',
+  relaySaved:'保存しました。',
+  aiFail:'今はつながらないので、保存してある内容だけでお答えします。',
+  /* mind wellness */
+  wTitle:'💚 こころ', wHint:'今日の気分を簡単に記録します。相談のときに見せることができます。',
+  wMoodTitle:'今日のご気分はいかがですか?',
+  moodLabels:['とても良い','良い','ふつう','少しつらい','とてもつらい'],
+  wMoodSaved:'ありがとうございます。今日の気分を書き留めました。',
+  wCheckTitle:'こころの点検', wCheckHint:'この2週間についての短い質問が2つです。テストではありませんので、気楽にお答えください。',
+  wStart:'2つの質問に答える',
+  q1:'この2週間、気分が沈む、憂うつ、絶望的だと感じることが、どのくらいありましたか?',
+  q2:'この2週間、物事に興味や楽しみを感じられないことが、どのくらいありましたか?',
+  opts:['全くない','数日あった','半分以上の日','ほとんど毎日'],
+  wResultLow:'お答えいただき、ありがとうございます。こころは比較的お元気のようです。ときどきこうして振り返るのは良い習慣です。',
+  wResultHigh:'お答えいただき、ありがとうございます。このごろ、こころが重いご様子です。相談の先生とお話しすると、きっと助けになります。下の相談連絡先をご覧ください。',
+  wCrisis:'とてもつらいときは、昼夜いつでも988に電話やメッセージができます。やさしい人が話を聞いてくれます。通訳もあります。',
+  wDisclaim:'この点検は簡単な振り返りであり、医学的な検査や診断ではありません。ご気分が心配なときは、相談の先生や医師にお話しください。',
+  wShareTitle:'相談のときに見せる', wShareHint:'最近の気分と答えを、大きな文字で1つの画面にまとめます。', wShareBtn:'まとめ画面を開く',
+  wCounselorTitle:'相談の連絡先', wCounselorHint:'相談の先生の情報がここに表示されます。ご家族や担当の方が入れます。',
+  wcName:'相談の先生のお名前', wcOrg:'所属 / 機関', wcPhone:'電話番号', wEditC:'相談連絡先を入力',
+  noCounselorTxt:'相談の連絡先はまだ登録されていません。',
+  wSummaryTitle:'最近のわたしのこころ(この4週間)',
+  wMoodSec:'毎日の気分', wCheckSec:'こころの点検の答え',
+  checkScore:n=>`点検の結果 ${n} / 6`,
+  wNoData:'まだ記録がありません。',
+  wClose:'閉じる'
+}};
+const t = () => T[DB.lang] || T.en;
+
+/* ---------------- speech out (TTS) ---------------- */
+let voices = [];
+function loadVoices(){ try{ voices = speechSynthesis.getVoices()||[]; }catch(e){} }
+loadVoices();
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = loadVoices;
+
+function say(text){
+  if (!text) return;
+  document.getElementById('live').textContent = text;
+  if (!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const want = t().voice;
+    const v = voices.find(x=>x.lang && x.lang.replace('_','-')===want)
+           || voices.find(x=>x.lang && x.lang.toLowerCase().startsWith(want.slice(0,2)));
+    if (v) u.voice = v;
+    u.lang = want; u.rate = 0.88; u.pitch = 1.0; u.volume = 1.0;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
 
-/* =========================================================
-   RECOGNITION FLOW — describe, don't judge.
-   Scores signals silently; never tells user "you are a victim."
-   ========================================================= */
-const RQ=[
-  {id:'setting', q:"First — what kind of moment are we looking at?", sub:"Pick whatever fits best. There are no wrong answers.",
-   opts:[
-     {v:'oneword',h:"Something someone said",s:"A comment, a joke, a remark that stuck with you"},
-     {v:'touch',h:"Physical — contact or closeness",s:"Being touched, cornered, or crowded"},
-     {v:'exclude',h:"Being left out or shut down",s:"Ignored, excluded, undermined, talked over"},
-     {v:'power',h:"Someone using their position",s:"A senior, supervisor, or instructor over you"},
-     {v:'unsure',h:"I honestly can't categorize it",s:"It just felt off"},
-   ]},
-  {id:'body', q:"When it happened — or when you think back on it — what did your body do?", sub:"Your body often registers a problem before your mind puts words to it. Choose any that apply.", multi:true,
-   opts:[
-     {v:'froze',h:"I froze or went blank",s:"",w:2},
-     {v:'sick',h:"My stomach dropped / felt sick",s:"",w:2},
-     {v:'small',h:"I wanted to disappear or get away",s:"",w:2},
-     {v:'replay',h:"I keep replaying it afterward",s:"",w:2},
-     {v:'doubt',h:"I started doubting my own read of it",s:"",w:1},
-     {v:'none',h:"Nothing much — I'm just not sure",s:"",w:0},
-   ]},
-  {id:'delay', q:"Did it take you a while to feel that something was wrong?", sub:"This is one of the most common — and most misunderstood — experiences. There's no wrong answer.",
-   opts:[
-     {v:'immediate',h:"No, I knew right away",s:"",w:0},
-     {v:'hours',h:"It hit me hours or days later",s:"",w:1},
-     {v:'now',h:"I'm only realizing it now",s:"",w:1},
-   ]},
-  {id:'signals', q:"Do any of these describe how the person behaved?", sub:"These are patterns specialists watch for. Select any you recognize — even loosely.", multi:true,
-   opts:[
-     {v:'private',h:"Kept it just between us / asked me not to tell",s:"",w:2},
-     {v:'test',h:"Pushed a little further each time",s:"Testing where my line was",w:2},
-     {v:'favor',h:"Offered favors, then expected something back",s:"",w:2},
-     {v:'isolate',h:"Tried to get me alone or away from others",s:"",w:2},
-     {v:'deny',h:"Made me feel like I imagined it",s:"'You're too sensitive', 'that never happened'",w:2},
-     {v:'threat',h:"Hinted it could affect my career or standing",s:"",w:3},
-     {v:'none',h:"None of these",s:"",w:0},
-   ]},
-  {id:'position', q:"Where does this person stand in relation to you?", sub:"Power difference changes what's at stake.",
-   opts:[
-     {v:'over',h:"Above me — rates me, leads me, or teaches me",s:"",w:2},
-     {v:'peer',h:"A peer",s:"",w:0},
-     {v:'under',h:"Below me",s:"",w:0},
-     {v:'other',h:"Not sure / someone else",s:"",w:0},
-   ]},
-];
-let rqState={i:0, ans:{}};
-function startRecognition(){ rqState={i:0, ans:{}}; show('s-recog'); renderRQ(); }
-function renderRQ(){
-  const host=document.getElementById('rqHost');
-  const step=RQ[rqState.i];
-  const pct=Math.round((rqState.i)/(RQ.length)*100);
-  if(rqState.i>=RQ.length){ return renderRQResult(); }
-  const sel=rqState.ans[step.id]||(step.multi?[]:null);
-  host.innerHTML=`
-    <div class="rq-progress"><span style="width:${pct}%"></span></div>
-    <h2>${step.q}</h2>
-    <div class="sub">${step.sub}</div>
-    ${step.multi?'<div class="multi-hint">You can choose more than one.</div>':''}
-    <div id="rqOpts"></div>
-    <div class="btn-row">
-      ${rqState.i>0?'<button class="btn ghost" onclick="rqPrev()">Back</button>':''}
-      <button class="btn" id="rqNext" onclick="rqNext()">${step.multi?'Continue':'Continue'}</button>
-    </div>`;
-  const o=document.getElementById('rqOpts');
-  step.opts.forEach(opt=>{
-    const on = step.multi ? sel.includes(opt.v) : sel===opt.v;
-    const b=document.createElement('button');
-    b.className='opt'+(on?' sel':'');
-    b.innerHTML=`<span class="oh">${opt.h}</span>${opt.s?`<span class="os">${opt.s}</span>`:''}`;
-    b.onclick=()=>{
-      if(step.multi){
-        let arr=rqState.ans[step.id]||[];
-        if(opt.v==='none'){ arr=['none']; }
-        else { arr=arr.filter(x=>x!=='none'); arr.includes(opt.v)?arr=arr.filter(x=>x!==opt.v):arr.push(opt.v); }
-        rqState.ans[step.id]=arr;
-      } else { rqState.ans[step.id]=opt.v; }
-      renderRQ();
+/* ---------------- speech in (STT) ---------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false, sttTarget = 'ask';
+function sttSupported(){ return !!SR; }
+
+function setMic(on){
+  listening = on;
+  document.getElementById('micBtn').classList.toggle('live',on);
+  document.getElementById('micDot').textContent = on ? '🔴' : '🎤';
+  document.getElementById('micLabel').textContent = on ? t().micLive : t().micIdle;
+}
+
+function toggleListen(){
+  if (listening){ try{ rec.stop(); }catch(e){} setMic(false); return; }
+  startListen('ask');
+}
+
+function startListen(target){
+  sttTarget = target;
+  if (!sttSupported()){ showSttWarn(t().sttNo); return; }
+  try{
+    rec = new SR();
+    rec.lang = t().voice;
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 3;
+
+    let finalText = '';
+    rec.onstart = ()=>{ setMic(true); showSttWarn(''); setHeard('…'); };
+    rec.onresult = (e)=>{
+      let interim = '';
+      for (let i=e.resultIndex;i<e.results.length;i++){
+        const r = e.results[i];
+        if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+      }
+      setHeard(finalText || interim);
     };
-    o.appendChild(b);
-  });
-}
-function rqNext(){
-  const step=RQ[rqState.i];
-  const a=rqState.ans[step.id];
-  if(!a||(step.multi&&a.length===0)){ toast('Pick what fits — or the "not sure" option'); return; }
-  rqState.i++; renderRQ();
-}
-function rqPrev(){ if(rqState.i>0){rqState.i--;renderRQ();} }
-
-function scoreRQ(){
-  let score=0; const flags=[];
-  const a=rqState.ans;
-  const add=(w)=>score+=w;
-  // body
-  (a.body||[]).forEach(v=>{ const o=RQ[1].opts.find(x=>x.v===v); if(o)add(o.w); });
-  if((a.body||[]).some(v=>['froze','sick','small'].includes(v)))
-    flags.push({t:"<b>Your body reacted.</b> Freezing, nausea, or wanting to flee are involuntary stress responses — signs something felt genuinely unsafe."});
-  // delay
-  const d=RQ[2].opts.find(x=>x.v===a.delay); if(d)add(d.w);
-  if(a.delay==='hours'||a.delay==='now')
-    flags.push({t:"<b>Delayed recognition is normal.</b> Realizing later doesn't mean it wasn't real, and it doesn't weaken your account. It's one of the most common trauma responses there is."});
-  // signals
-  (a.signals||[]).forEach(v=>{ const o=RQ[3].opts.find(x=>x.v===v); if(o)add(o.w); });
-  const sigNames={private:'secrecy',test:'boundary-testing',favor:'favors with strings',isolate:'isolation',deny:'making you doubt yourself',threat:'career pressure'};
-  const chosen=(a.signals||[]).filter(v=>v!=='none');
-  if(chosen.length)
-    flags.push({t:`<b>You named ${chosen.length} known warning sign${chosen.length>1?'s':''}:</b> ${chosen.map(v=>sigNames[v]).join(', ')}. These are recognized tactics — not things a respectful person does by accident.`});
-  // position
-  const p=RQ[4].opts.find(x=>x.v===a.position); if(p)add(p.w);
-  if(a.position==='over')
-    flags.push({t:"<b>There's a power difference.</b> When the person outranks or evaluates you, saying no carries real risk — which is exactly why the responsibility sits with them, not you."});
-  if(a.setting==='touch') add(2);
-  if(a.setting==='power') add(1);
-  return {score, flags};
-}
-function renderRQResult(){
-  const host=document.getElementById('rqHost');
-  const {score,flags}=scoreRQ();
-  let tier,badge,k,head,body;
-  if(score>=8){ tier='strong'; k='Worth acting on'; head="What you're describing lines up with serious warning signs.";
-    body="You don't need to be certain, and you don't need to have it all figured out. This is the kind of situation a SARC or advocate exists for — talking to one costs you nothing and commits you to nothing."; }
-  else if(score>=4){ tier='concern'; k='Worth a closer look'; head="Several things here are worth taking seriously.";
-    body="This may not be nothing. Recording what happened while it's fresh, and watching whether it repeats, will help you see it clearly — and gives you options if it continues."; }
-  else { tier='watch'; k='Trust the unease'; head="There isn't a lot here yet — but you felt something, and that counts.";
-    body="Keep a quiet record. If it stands alone, that's fine. If it starts to repeat, you'll have the beginning of a timeline instead of a blur of half-memories."; }
-
-  host.innerHTML=`
-    <div class="result-badge ${tier}">
-      <div class="k">${k}</div>
-      <h2>${head}</h2>
-      <p>${body}</p>
-    </div>
-    <div class="note"><b>This is not a diagnosis or a verdict.</b> Compass can't decide what happened — only you and, if you choose, a trained advocate can. What it can do is help you see the shape of it.</div>
-    ${flags.length?`<div class="section-label">What stood out</div><div class="card"><ul class="flag-list">${flags.map(f=>`<li><div class="fi">!</div><div class="ft">${f.t}</div></li>`).join('')}</ul></div>`:''}
-    <div class="section-label">What now — your call</div>
-    <button class="btn" onclick="saveFromRecog()">Save this as a record</button>
-    <div class="btn-row">
-      <button class="btn ghost" onclick="show('s-report')">See my options</button>
-      <button class="btn ghost" onclick="goHome()">Not now</button>
-    </div>
-    <div class="footer-note" style="padding-top:22px">Nothing here has been shared or reported. It's yours, on this device.</div>`;
-  db.recog.push({t:Date.now(),score,tier}); save();
-}
-function saveFromRecog(){
-  const a=rqState.ans;
-  const catMap={touch:'sh',oneword:'ha',exclude:'ha',power:'ha',unsure:'ot'};
-  let cat=catMap[a.setting]||'ot';
-  if((a.signals||[]).includes('threat')) cat='re';
-  const seed={
-    cat,
-    title:'',
-    body:'',
-    person:'',
-    prefill:{signals:a.signals||[], body:a.body||[], delay:a.delay, position:a.position}
-  };
-  newEntry(seed);
+    rec.onerror = (e)=>{
+      setMic(false);
+      if (e.error==='not-allowed'||e.error==='service-not-allowed') showSttWarn(t().sttDenied);
+      else if (e.error==='no-speech') showSttWarn(t().sttNoSpeech);
+      else if (e.error==='network') showSttWarn(t().sttNet);
+    };
+    rec.onend = ()=>{
+      setMic(false);
+      const txt = (finalText||document.getElementById('heardTxt').textContent||'').trim();
+      if (!txt || txt==='…' || txt==='—') return;
+      if (sttTarget==='note') captureNote(txt); else handleQuestion(txt);
+    };
+    rec.start();
+  }catch(e){ setMic(false); showSttWarn(t().sttNo); }
 }
 
-/* =========================================================
-   JOURNAL
-   ========================================================= */
-const CATS={sh:{l:'Sexual misconduct',c:'cat-sh'},ha:{l:'Harassment / bullying',c:'cat-ha'},
-  di:{l:'Discrimination',c:'cat-di'},re:{l:'Reprisal / retaliation',c:'cat-re'},ot:{l:'Other / unsure',c:'cat-ot'}};
-let jFilter='all';
-function renderJournal(){
-  const row=document.getElementById('filterRow'); row.innerHTML='';
-  const filters=[['all','All'],['sh','Sexual'],['ha','Harassment'],['di','Discrimination'],['re','Reprisal'],['ot','Other']];
-  filters.forEach(([v,l])=>{const b=document.createElement('button');b.className='chip'+(jFilter===v?' on':'');b.textContent=l;b.onclick=()=>{jFilter=v;renderJournal();};row.appendChild(b);});
-  const host=document.getElementById('entryList');
-  let list=db.entries.slice().sort((a,b)=>b.when-a.when);
-  if(jFilter!=='all') list=list.filter(e=>e.cat===jFilter);
-  if(list.length===0){
-    host.innerHTML=`<div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16a1 1 0 0 0 1 1h15"/><path d="M8 8h9M8 12h9M8 16h6"/></svg>
-      <h3>${jFilter==='all'?'Nothing recorded yet':'None in this category'}</h3>
-      <p>${jFilter==='all'?'When something happens — or when you remember something — write it here. Even a few words, even if you are not sure it matters.':'Try another filter, or add a new record.'}</p></div>`;
+function showSttWarn(msg){
+  document.getElementById('sttWarn').innerHTML = msg ? `<div class="warn">${msg}</div>` : '';
+}
+function setHeard(x){ document.getElementById('heardTxt').textContent = x; }
+function setReply(x){ document.getElementById('replyTxt').textContent = x; }
+
+function askByTyping(){
+  const q = prompt(t().askPrompt);
+  if (q && q.trim()){ setHeard(q); handleQuestion(q); }
+}
+
+/* ---------------- question handling ---------------- */
+function norm(s){ return (s||'').toLowerCase().replace(/[.,!?~'"()\-]/g,' ').replace(/\s+/g,' ').trim(); }
+
+const KW = {
+  medStatus:['약','먹었','복용','medicine','medication','pill','took my','take my','medicina','medicamento','pastilla','tomé','tome mis','薬','くすり','飲んだ','のんだ'],
+  timeDate:['오늘','며칠','날짜','무슨 요일','몇 시','시간','what day','what time','date','today','qué día','que dia','fecha','qué hora','que hora','hoy','今日','何日','何時','曜日','なんにち'],
+  call:['전화','연락','call','phone','number','llamar','llama','teléfono','telefono','número','numero','電話','番号'],
+  doctor:['의사','병원','주치의','doctor','clinic','physician','médico','medico','clínica','clinica','医者','病院','お医者','主治医'],
+  pharmacy:['약국','pharmacy','pharmacist','farmacia','薬局'],
+  repair:['수리','고장','기사','repair','fix','plumber','technician','softener','reparar','arreglar','técnico','tecnico','修理','故障'],
+  family:['딸','아들','가족','자식','daughter','son','family','kid','child','hija','hijo','familia','娘','息子','家族','子ども'],
+  greet:['안녕','좋은 아침','좋은 저녁','hello','hi','good morning','good afternoon','good evening','hey','hola','buenos días','buenos dias','buenas tardes','buenas noches','こんにちは','おはよう','こんばんは'],
+  howAreYou:['잘 지내','어떻게 지내','어때','how are you','how do you do','are you ok','cómo estás','como estas','cómo está','como esta','元気','げんき'],
+  thanks:['고마','감사','thank','thanks','appreciate','gracias','ありがとう']
+};
+const hit = (q,arr) => arr.some(k=>q.includes(norm(k)));
+
+/* main entry: try the conversation relay first, fall back to built-in answers */
+async function handleQuestion(raw){
+  const q = norm(raw);
+
+  if (DB.relayUrl){
+    setReply(t().thinking);
+    const a = await askAI(raw);
+    if (a){ setReply(a); say(a); return; }
+    const local = localAnswer(q);
+    setReply(local); say(local);
     return;
   }
-  host.innerHTML='';
-  list.forEach(e=>{
-    const dt=new Date(e.when);
-    const cat=CATS[e.cat]||CATS.ot;
-    const meta=[];
-    if(e.person) meta.push('👤 '+escapeHtml(e.person));
-    if(e.where) meta.push('📍 '+escapeHtml(e.where));
-    if(e.witness) meta.push('👁 '+escapeHtml(e.witness));
-    if(e.evidence) meta.push('📎 '+escapeHtml(e.evidence));
-    const div=document.createElement('div'); div.className='entry';
-    div.innerHTML=`
-      <div class="entry-top">
-        <span class="entry-date">${dt.toLocaleDateString([], {weekday:'short',year:'numeric',month:'short',day:'numeric'})} · ${dt.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span>
-        <span class="entry-cat ${cat.c}">${cat.l}</span>
-      </div>
-      ${e.title?`<h4>${escapeHtml(e.title)}</h4>`:''}
-      <div class="ebody">${escapeHtml(e.body||'(no description)')}</div>
-      ${meta.length?`<div class="emeta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
-      <div class="entry-actions">
-        <button onclick="editEntry('${e.id}')">Edit</button>
-        <button onclick="delEntry('${e.id}')">Delete</button>
-      </div>`;
-    host.appendChild(div);
-  });
-}
-function newEntry(seed){
-  const now=new Date();
-  const e={id:'e'+Date.now(), when:now.getTime(), cat:seed&&seed.cat?seed.cat:'ot',
-    title:'', body:'', person:'', where:'', witness:'', evidence:'', feelings:[], _prefill:seed&&seed.prefill};
-  editEntry(null, e);
-}
-function editEntry(id, seedObj){
-  const e = seedObj || Object.assign({}, db.entries.find(x=>x.id===id));
-  if(!e) return;
-  const dt=new Date(e.when);
-  const dateStr=dt.toISOString().slice(0,10);
-  const timeStr=dt.toTimeString().slice(0,5);
-  const feelChips=['Frozen','Sick / knot in stomach','Wanted to leave','Ashamed','Angry','Confused','Scared','Numb'];
-  const host=document.getElementById('entryHost');
-  host.innerHTML=`
-    <p class="lede">Write it the way you'd tell a trusted friend. Exact words matter more than tidy sentences.</p>
-    <div class="field">
-      <label>What kind of moment was this?</label>
-      <select id="f-cat">
-        ${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${e.cat===k?'selected':''}>${v.l}</option>`).join('')}
-      </select>
-    </div>
-    <div class="field">
-      <label>When did it happen?</label>
-      <div style="display:flex;gap:10px">
-        <input type="date" id="f-date" value="${dateStr}" style="flex:1">
-        <input type="time" id="f-time" value="${timeStr}" style="flex:1">
-      </div>
-    </div>
-    <div class="field">
-      <label>A short title <span class="hint">optional — e.g. "comment in the break room"</span></label>
-      <input type="text" id="f-title" value="${escapeAttr(e.title)}" placeholder="Optional">
-    </div>
-    <div class="field">
-      <label>What happened?</label>
-      <textarea id="f-body" placeholder="What was said or done? Try to capture exact words in quotes if you can. What led up to it, and what happened right after.">${escapeHtml(e.body)}</textarea>
-    </div>
-    <div class="field">
-      <label>How did you feel — in your body?</label>
-      <div class="chips" id="feelChips">
-        ${feelChips.map(f=>`<button class="chip ${(e.feelings||[]).includes(f)?'on':''}" data-f="${f}">${f}</button>`).join('')}
-      </div>
-    </div>
-    <div class="field">
-      <label>Who was involved? <span class="hint">a name or description — recording the same person twice is how patterns surface</span></label>
-      <input type="text" id="f-person" value="${escapeAttr(e.person)}" placeholder="Name, rank, or 'the shift supervisor'">
-    </div>
-    <div class="field">
-      <label>Where? <span class="hint">optional</span></label>
-      <input type="text" id="f-where" value="${escapeAttr(e.where)}" placeholder="Location">
-    </div>
-    <div class="field">
-      <label>Anyone else there? <span class="hint">optional — witnesses matter later</span></label>
-      <input type="text" id="f-witness" value="${escapeAttr(e.witness)}" placeholder="Who saw or heard it">
-    </div>
-    <div class="field">
-      <label>Anything that backs it up? <span class="hint">optional — texts, emails, photos, messages. Note where they are.</span></label>
-      <input type="text" id="f-evidence" value="${escapeAttr(e.evidence)}" placeholder="e.g. 'screenshot saved in Photos, 6:12pm'">
-    </div>
-    ${e._prefill?renderPrefillNote(e._prefill):''}
-    <button class="btn" onclick="commitEntry('${e.id}', ${seedObj&&!db.entries.find(x=>x.id===e.id)?'true':'false'})">Save record</button>
-    <button class="btn ghost" style="margin-top:10px" onclick="goBack()">Cancel</button>
-    <div class="note" style="margin-top:18px"><b>Reminder:</b> this record lives only on this phone. It helps you remember accurately — it isn't an official report, and only you can start one of those.</div>
-  `;
-  host.querySelectorAll('#feelChips .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
-  window._editing=e;
-  show('s-entry');
-}
-function renderPrefillNote(p){
-  const bits=[];
-  const sigNames={private:'secrecy',test:'boundary-testing',favor:'favors with strings',isolate:'isolation',deny:'making you doubt yourself',threat:'career pressure'};
-  if(p.signals&&p.signals.filter(x=>x!=='none').length) bits.push('signals you flagged: '+p.signals.filter(x=>x!=='none').map(v=>sigNames[v]).join(', '));
-  if(p.position==='over') bits.push('person is senior to you');
-  if(p.delay==='hours'||p.delay==='now') bits.push('recognized after some delay');
-  if(!bits.length) return '';
-  return `<div class="note amber"><b>Carried over from your questions:</b> ${bits.join(' · ')}. Feel free to add detail above.</div>`;
-}
-function commitEntry(id, isNew){
-  const e=window._editing;
-  const d=document.getElementById('f-date').value, t=document.getElementById('f-time').value||'00:00';
-  e.when=new Date(d+'T'+t).getTime()||Date.now();
-  e.cat=document.getElementById('f-cat').value;
-  e.title=document.getElementById('f-title').value.trim();
-  e.body=document.getElementById('f-body').value.trim();
-  e.person=document.getElementById('f-person').value.trim();
-  e.where=document.getElementById('f-where').value.trim();
-  e.witness=document.getElementById('f-witness').value.trim();
-  e.evidence=document.getElementById('f-evidence').value.trim();
-  e.feelings=[...document.querySelectorAll('#feelChips .chip.on')].map(c=>c.dataset.f);
-  delete e._prefill;
-  if(!e.body && !e.title){ toast('Add at least a few words'); return; }
-  const existing=db.entries.findIndex(x=>x.id===e.id);
-  if(existing>=0) db.entries[existing]=e; else db.entries.push(e);
-  save(); toast('Saved to this device'); goHome(); refreshHome();
-}
-function delEntry(id){
-  modal(`<h3>Delete this record?</h3><p>This can't be undone. If this record might matter to a future report, consider keeping it.</p>
-    <button class="btn danger" onclick="confirmDel('${id}')">Delete</button>
-    <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">Keep it</button>`);
-}
-function confirmDel(id){ db.entries=db.entries.filter(x=>x.id!==id); save(); closeModal(); renderJournal(); refreshHome(); toast('Deleted'); }
 
-/* =========================================================
-   LEARN — how tactics work
-   ========================================================= */
-function renderLearn(){
-  document.getElementById('learnHost').innerHTML=`
-    <p class="lede">Most harm doesn't announce itself. It arrives as something small, deniable, easy to explain away. Naming the method is how "maybe I imagined it" turns into "I see what that was."</p>
-
-    <div class="section-label">Why you might not notice at first</div>
-    <div class="card">
-      <h3>It's designed to be deniable</h3>
-      <p>A skilled offender moves in ways that each look minor on their own — a hand that lingers a second too long, a joke aimed at you, a "compliment" with an edge. Any single moment can be waved off. That deniability is the tactic, not a coincidence.</p>
-    </div>
-    <div class="card">
-      <h3>Recognizing it later is the rule, not the exception</h3>
-      <p>Freezing in the moment and understanding it hours, days, or weeks later is a normal nervous-system response. Delay does not mean consent, and it does not make your account less true.</p>
-    </div>
-    <div class="card">
-      <h3>Doubt gets planted on purpose</h3>
-      <p>"You're too sensitive." "That's not what happened." "Can't you take a joke?" When someone works to make you distrust your own memory, that itself is a warning sign — it's called being made to doubt what you experienced.</p>
-    </div>
-
-    <div class="section-label">The common tactics</div>
-    ${[
-      ['Boundary-testing','Small intrusions that escalate — standing too close, a touch on the shoulder, then the back — each one a test of whether you will push back. Compliance with a small thing is treated as permission for the next.'],
-      ['Isolation','Getting you alone: the extra shift together, the ride, the private talk away from everyone. Separation from others removes witnesses and support.'],
-      ['Favors with strings','Help, gifts, or special treatment offered freely — then quietly expected to be repaid. It reframes an obligation as something you "owe."'],
-      ['Secrecy','"Keep this between us." Secrecy protects the person doing harm, not you. A relationship that requires hiding is worth questioning.'],
-      ['Using rank or role','A senior, rater, or instructor leveraging the fact that your standing, evaluation, or career sits partly in their hands. The power gap makes "no" costly — which is why the responsibility is entirely theirs.'],
-      ['Career pressure','Hints that speaking up, or not going along, could cost you an assignment, a rating, or a reputation. Tying your future to your silence is a serious red flag.'],
-    ].map(([t,d])=>`<div class="card"><h3>${t}</h3><p>${d}</p></div>`).join('')}
-
-    <div class="section-label">Exclusion & bullying can be just as real</div>
-    <div class="card">
-      <h3>When it's not one event but a climate</h3>
-      <p>Being consistently talked over, left off the email, assigned the worst tasks, mocked, or frozen out doesn't leave a single dramatic moment to point to. That's why it's so often dismissed. A timeline of small exclusions is exactly how you make an invisible pattern visible.</p>
-    </div>
-
-    <div class="note"><b>If any of this sounds familiar,</b> the "Was that okay?" walkthrough can help you look at a specific moment, and the record keeps it from fading. Neither one shares anything or commits you to reporting.</div>
-    <button class="btn" onclick="startRecognition()">Look at a specific moment</button>
-    <button class="btn ghost" style="margin-top:10px" onclick="show('s-report')">See reporting options</button>
-  `;
+  const a = localAnswer(q);
+  setReply(a); say(a);
 }
 
-/* =========================================================
-   FEAR — the career fear + you're not alone
-   ========================================================= */
-function renderFear(){
-  document.getElementById('fearHost').innerHTML=`
-    <p class="lede">The hardest part usually isn't naming what happened. It's the fear of what happens after you say it out loud. That fear is real and reasonable — so let's be honest about it instead of pretending it away.</p>
+/* built-in answers — used with no connection, or if the connection fails */
+function localAnswer(q){
+  const L = t();
 
-    <div class="section-label">The fear, named plainly</div>
-    <div class="card">
-      <h3>"It'll cost me my career."</h3>
-      <p>This is the number one reason people stay silent — and it isn't paranoia. Retaliation does happen. But here's what many people don't know: punishing you for reporting is itself illegal, and it's a separate violation you can report on its own.</p>
-    </div>
+  if (hit(q,KW.thanks) && !hit(q,KW.medStatus)) return L.thanks;
 
-    <div class="note amber"><b>Retaliation has a name: reprisal.</b> Taking or threatening an unfavorable personnel action — a bad evaluation, a punitive reassignment, being frozen out — because you made a protected report violates federal law (10 U.S.C. §1034). It is not the price of speaking up. It's a second thing that can be investigated by the IG.</div>
+  if (hit(q,KW.howAreYou)) return L.howAreYou;
 
-    <div class="section-label">What changes the math</div>
-    <div class="card">
-      <h3>You don't have to go all-in to start</h3>
-      <p>A <b>restricted report</b> lets you get medical care, counseling, and a victim advocate <b>without</b> notifying your command or starting an investigation. It's a real door between silence and a full investigation — one many people don't realize exists.</p>
-    </div>
-    <div class="card">
-      <h3>Recording now doesn't commit you to anything</h3>
-      <p>Keeping a private, dated record changes nothing about your standing today. It triggers no process. But evidence fades and memories blur — so a quiet record now means that <b>if</b> you decide to act later, you do it from a position of strength instead of scrambling to reconstruct what happened.</p>
-      <p style="margin-top:8px">Record now. Decide later. Those are two separate choices, and you only have to make the first one today.</p>
-    </div>
-
-    <div class="note"><b>An honest word:</b> no one can promise reporting will be painless — and any tool that tells you otherwise is lying to you. What's true is this: retaliation is illegal, it can be documented and challenged, and you do not have to carry any of it alone.</div>
-
-    <div class="section-label">You won't be doing it alone</div>
-    <p class="lede" style="font-size:15px">Reporting is something you initiate — but not something you have to walk through by yourself. These people exist specifically to stand beside you, and most cost nothing.</p>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-sea">⚖</div><div><h3>Your own free attorney (SVC / VLC / VC)</h3><div class="pw">A lawyer who works only for you</div></div></div>
-      <div class="path-body">
-        <p>The military assigns sexual-assault victims a dedicated, free attorney whose only job is <b>your</b> interests — not the command's, not the prosecutor's. The name depends on your branch:</p>
-        <ul>
-          <li><b>Special Victims' Counsel (SVC)</b> — Army, National Guard, Coast Guard</li>
-          <li><b>Victims' Legal Counsel (VLC)</b> — Navy, Marine Corps</li>
-          <li><b>Victims' Counsel (VC)</b> — Air Force</li>
-        </ul>
-        <div class="kv"><span class="k">Key point</span><span class="v">You can access this counsel whether you file restricted, unrestricted, or haven't reported at all yet.</span></div>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-amber">🤝</div><div><h3>SARC & Victim Advocate</h3><div class="pw">Support and guidance through every step</div></div></div>
-      <div class="path-body">
-        <p>A SARC or SAPR Victim Advocate helps you understand your options, comes with you to appointments, and can help you put words to what happened when it's hard to. Free, and confidential if you report restricted.</p>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-sand">🩺</div><div><h3>MST Coordinator</h3><div class="pw">At every VA medical center</div></div></div>
-      <div class="path-body">
-        <p>For Military Sexual Trauma, each VA facility has a coordinator who connects you to care. MST-related treatment is available <b>free</b>, and you don't need a filed report or a disability rating to get it.</p>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-ink">📋</div><div><h3>VSO — Veterans Service Officer</h3><div class="pw">Free help with VA disability claims</div></div></div>
-      <div class="path-body">
-        <p>Groups like the VFW, DAV, and American Legion have officers who help you file VA claims — including MST claims — at no cost. They do this constantly and know the process.</p>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-sea">📞</div><div><h3>Outside organizations</h3><div class="pw">Independent of your command</div></div></div>
-      <div class="path-body">
-        <p><b>Protect Our Defenders</b> focuses on service members facing sexual assault and retaliation, and can connect you to free legal help. <b>RAINN</b> offers 24/7 confidential support and help thinking through next steps.</p>
-        <div class="kv"><span class="k">And remember</span><span class="v">A trusted friend, family member, or fellow service member coming with you counts too — and witnesses matter later.</span></div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn" onclick="show('s-report')">See the reporting doors</button>
-      <button class="btn ghost" onclick="show('s-journal')">Start a record</button>
-    </div>
-    <div class="footer-note" style="padding-top:20px">Nothing here reports anything or notifies anyone. It's information, on your device, for whenever you're ready.</div>
-  `;
-}
-
-/* =========================================================
-   RECOVERY — don't let it harden you
-   ========================================================= */
-function renderRecover(){
-  document.getElementById('recoverHost').innerHTML=`
-    <p class="lede">Reporting is about accountability for what was done to you. This part is about something reporting can't touch — what the experience does to you over time, and making sure it doesn't quietly turn you into someone you never wanted to be.</p>
-
-    <div class="section-label">The thing no one says out loud</div>
-    <div class="card">
-      <h3>Unhealed pain doesn't just sit still</h3>
-      <p>When a wound like this goes untended, people often build armor to survive: they get guarded, sharp, quick to expect the worst. That armor makes sense — it kept you safe. But left unchecked, it can start to aim outward, at people who never hurt you. That's how hurt gets passed down a chain.</p>
-    </div>
-    <div class="note"><b>This is not a warning about you — it's a reason to care for yourself.</b> Noticing this risk is exactly what keeps you from it. People who are becoming harsh rarely see it happening; the fact that you can see it means you're already resisting it.</div>
-
-    <div class="card">
-      <h3>Recovery isn't a luxury — it's how you protect your future self</h3>
-      <p>Getting care isn't weakness or self-indulgence. It's the thing that keeps the damage from spreading — into your relationships, your work, the people who'll depend on you later. You heal not only for your own sake, but so the harm stops with you.</p>
-    </div>
-
-    <div class="section-label">What "getting care" can actually look like</div>
-    <div class="card"><h3>Talk to a professional</h3><p>A counselor or therapist — ideally one experienced with trauma or MST — helps you make sense of it out loud, where it loses some of its grip. Through the VA, MST-related care is free and doesn't require a report or a rating.</p></div>
-    <div class="card"><h3>Peer support</h3><p>Other people who've been through it can remind you that your reactions are normal and that you're not alone or "crazy." Sometimes being believed by someone who gets it does more than anything else.</p></div>
-    <div class="card"><h3>Get it out of your own head</h3><p>Turning it over alone, endlessly, feeds the worst interpretations — including the ones about yourself. Saying it to a trusted person, or even writing it down here, breaks that loop.</p></div>
-
-    <div class="section-label">If it ever gets very dark</div>
-    <p class="lede" style="font-size:15px">Some days the weight is heavier than others. If you ever feel like you can't go on, or you're thinking about hurting yourself, please reach out right then — you don't have to be in a full crisis to use these.</p>
-    <div class="hot"><div class="hi">☎</div><div><h4>Veterans / Military Crisis Line</h4><p>24/7, confidential — press 1 after dialing</p></div><div class="num">988 › 1</div></div>
-    <div class="hot"><div class="hi">✉</div><div><h4>Crisis Line by text</h4><p>When talking is too much</p></div><div class="num">838255</div></div>
-    <div class="hot"><div class="hi">🛡</div><div><h4>DoD Safe Helpline</h4><p>24/7 confidential support for sexual assault</p></div><div class="num">877-995-5247</div></div>
-
-    <div class="note"><b>One last thing.</b> The care you're building this tool to give other people — you're allowed to give it to yourself too. You are exactly the kind of person it's meant to help.</div>
-  `;
-}
-
-/* =========================================================
-   REPORT — DoD pathways (verified against SAPR/EO/IG guidance)
-   ========================================================= */
-function renderReport(){
-  document.getElementById('reportHost').innerHTML=`
-    <p class="lede">In the U.S. Armed Forces, different concerns go through different doors. Here's what each door is for — in plain terms — so you can choose with your eyes open. You can talk to any of them without committing to anything.</p>
-
-    <div class="note alarm"><b>In immediate danger, call 911.</b> These pathways are for reporting and support, not emergencies.</div>
-
-    <div class="pattern-alert" style="cursor:pointer" onclick="show('s-fear')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg>
-      <div><h4>Afraid this could cost you?</h4><p>If fear of retaliation or facing it alone is holding you back, read this first — including the free people who can stand beside you.</p><button>Before you speak up →</button></div>
-    </div>
-
-    <div class="section-label">Talk to someone now — confidential</div>
-    <div class="hot"><div class="hi">☎</div><div><h4>DoD Safe Helpline</h4><p>24/7, confidential, for sexual assault</p></div><div class="num">877-995-5247</div></div>
-    <div class="hot"><div class="hi">☎</div><div><h4>988 Lifeline</h4><p>Crisis & emotional support · press 1 for Veterans/Military</p></div><div class="num">988</div></div>
-    <div class="hot"><div class="hi">☎</div><div><h4>DoD IG Hotline</h4><p>Fraud, abuse of authority, whistleblower reprisal</p></div><div class="num">800-424-9098</div></div>
-
-    <div class="section-label">The three main doors</div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-sea">🛡</div><div><h3>SAPR — for sexual assault or sexual harassment</h3><div class="pw">Through a SARC or SAPR Victim Advocate</div></div></div>
-      <div class="path-body">
-        <p>A SARC (Sexual Assault Response Coordinator) or Victim Advocate gives you support, medical referral, and — importantly — a choice about how much becomes official. You get two options:</p>
-        <ul>
-          <li><b>Restricted report:</b> confidential. You get medical care, counseling, and advocacy <b>without</b> triggering an investigation or notifying your command. Good if you want support but aren't ready for an investigation.</li>
-          <li><b>Unrestricted report:</b> notifies command and law enforcement and starts an investigation. It also unlocks protections like a military protective order and expedited transfer.</li>
-        </ul>
-        <div class="kv"><span class="k">You can switch</span><span class="v">Restricted → Unrestricted anytime. But not the reverse — once it's unrestricted, it can't go back.</span></div>
-        <div class="kv"><span class="k">It's preserved</span><span class="v">Your reporting-preference form (and secured evidence) is retained for 50 years.</span></div>
-        <div class="kv"><span class="k">Heads-up</span><span class="v">Some people — like most instructors and anyone in your chain — are mandated reporters. A SARC or VA is the confidential route.</span></div>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-amber">⚖</div><div><h3>EO — for discrimination or harassment</h3><div class="pw">Military Equal Opportunity office</div></div></div>
-      <div class="path-body">
-        <p>Equal Opportunity handles harassment or discrimination based on <b>race, color, sex (including sexual harassment), religion, or national origin</b>, including bullying tied to those. If sexual harassment overlaps with SAPR, a SARC can also be involved.</p>
-        <ul>
-          <li>EO can pursue an informal resolution or a formal complaint with an investigation.</li>
-          <li>The alleged offender's commander acts on substantiated findings; you're briefed on the outcome and can appeal.</li>
-        </ul>
-        <div class="kv"><span class="k">Time limit</span><span class="v">Formal EO complaints generally must be filed within 60 days of the incident — don't sit on it.</span></div>
-        <div class="kv"><span class="k">Follow-up</span><span class="v">EO checks back with you afterward, including about any reprisal.</span></div>
-      </div>
-    </div>
-
-    <div class="path">
-      <div class="path-head"><div class="pico ico-ink">🔎</div><div><h3>IG — for abuse of authority & reprisal</h3><div class="pw">Inspector General</div></div></div>
-      <div class="path-body">
-        <p>The IG is for wrongdoing that doesn't fit the other doors: abuse of authority, gross mismanagement, waste, or violations of law and regulation. Critically, the IG is the <b>only</b> office that investigates <b>whistleblower reprisal</b> — being punished for making a protected complaint.</p>
-        <ul>
-          <li><b>Reprisal</b> = taking or threatening an unfavorable personnel action (or withholding a favorable one) because you made a protected communication — such as an EO or SAPR complaint, or going to the IG or Congress.</li>
-          <li>If you complained and then got a sudden bad evaluation, a punitive reassignment, or a retaliatory referral — that's what IG exists to examine.</li>
-        </ul>
-        <div class="kv"><span class="k">Tip</span><span class="v">This is exactly where your dated timeline pays off — showing what happened right after you spoke up.</span></div>
-      </div>
-    </div>
-
-    <div class="section-label">Common questions</div>
-    <details class="faq"><summary>I'm not sure it was "bad enough" to report.</summary><div class="fa-body">You don't have to decide that. A SARC or advocate can talk it through <b>confidentially</b> and you can stop at any point. Reaching out is not the same as filing, and filing restricted is not the same as an investigation.</div></details>
-    <details class="faq"><summary>It happened a while ago. Is it too late?</summary><div class="fa-body">For sexual assault, there's generally no short deadline to seek SAPR support, and restricted-report records are kept for 50 years. EO formal complaints do have a tighter window (about 60 days), so if it's discrimination-based, ask sooner rather than later.</div></details>
-    <details class="faq"><summary>Will my command find out automatically?</summary><div class="fa-body">Not with a <b>restricted</b> SAPR report — that's the point of it. With unrestricted reports, EO, and IG, certain notifications happen by design. Ask the office to walk you through exactly who learns what before you decide.</div></details>
-    <details class="faq"><summary>What if the problem is someone in my chain of command?</summary><div class="fa-body">You are not required to go through your chain. SARC, EO, and IG can all be approached directly, and the IG specifically exists for situations where the chain itself is the problem or where you fear reprisal.</div></details>
-    <details class="faq"><summary>Does my record in this app count as a report?</summary><div class="fa-body">No. Your entries here are a private aid to your memory. They can help you give an accurate account later, but starting an official report — and formally preserving evidence — goes through a SARC or the relevant office.</div></details>
-
-    <div class="note"><b>Bring your timeline.</b> When you're ready to talk to any of these offices, an organized record of dates, words, witnesses, and what happened after makes your account far stronger. That's what the record section is for.</div>
-    <button class="btn" onclick="show('s-journal')">Open my record</button>
-  `;
-}
-
-/* =========================================================
-   SETTINGS
-   ========================================================= */
-function renderSettings(){
-  const s=db.settings;
-  document.getElementById('settingsHost').innerHTML=`
-    <p class="lede">Compass runs entirely on this device. These controls are about your safety and privacy.</p>
-    <div class="card">
-      <div class="set-row"><div><div class="sl">Quick-exit button</div><div class="sd">Shows a floating button that instantly leaves for a neutral website.</div></div>
-        <div class="toggle ${s.quickExit?'on':''}" onclick="toggleSet('quickExit')"></div></div>
-      <div class="set-row"><div><div class="sl">Change PIN</div><div class="sd">Set a new lock code.</div></div>
-        <button class="btn ghost small" onclick="changePin()">Change</button></div>
-    </div>
-
-    <div class="section-label">Your data</div>
-    <div class="card">
-      <div class="set-row"><div><div class="sl">Export a copy</div><div class="sd">Save your records as a text file you control — for your own backup or to bring to an advocate.</div></div>
-        <button class="btn ghost small" onclick="exportData()">Export</button></div>
-      <div class="set-row"><div><div class="sl">Erase everything</div><div class="sd">Permanently deletes all records and settings from this device.</div></div>
-        <button class="btn ghost small" style="color:var(--alarm);border-color:var(--alarm)" onclick="wipeAll()">Erase</button></div>
-    </div>
-
-    <div class="note"><b>Nothing leaves this phone unless you export it.</b> There is no account, no cloud, and no network connection. That also means: if you lose the phone or clear its data, the records are gone. Export if you want a backup.</div>
-
-    <div class="footer-note">Compass is a private tool for noticing and recording. It is not legal advice, not a medical or investigative service, and not an official reporting channel. Reporting pathways described reflect general U.S. Armed Forces (DoD) guidance and can vary by installation — confirm specifics with your SARC, EO, or IG.</div>
-  `;
-}
-function toggleSet(k){ db.settings[k]=!db.settings[k]; save(); renderSettings();
-  document.getElementById('quickExit').classList.toggle('show', db.settings.quickExit); }
-function changePin(){ pinBuf='';pinMode='set';pinTmp='';
-  document.getElementById('app').style.display='none';
-  document.getElementById('lock').classList.add('active');
-  document.getElementById('lockTitle').textContent='Set a PIN';
-  document.getElementById('lockSub').textContent='Choose 4–8 digits';
-  drawDots(); }
-function exportData(){
-  const lines=['COMPASS — PRIVATE RECORD EXPORT','Generated '+new Date().toLocaleString(),'',
-    'This is your personal record. Keep it secure.','================================',''];
-  db.entries.slice().sort((a,b)=>a.when-b.when).forEach((e,i)=>{
-    const dt=new Date(e.when);
-    lines.push(`#${i+1} — ${dt.toLocaleString()}`);
-    lines.push('Category: '+(CATS[e.cat]?CATS[e.cat].l:'Other'));
-    if(e.title) lines.push('Title: '+e.title);
-    lines.push('What happened: '+(e.body||'—'));
-    if(e.feelings&&e.feelings.length) lines.push('Felt: '+e.feelings.join(', '));
-    if(e.person) lines.push('Person: '+e.person);
-    if(e.where) lines.push('Where: '+e.where);
-    if(e.witness) lines.push('Witness: '+e.witness);
-    if(e.evidence) lines.push('Evidence: '+e.evidence);
-    lines.push('--------------------------------','');
-  });
-  if(db.entries.length===0) lines.push('(no records)');
-  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='compass-record-'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  toast('Exported');
-}
-function wipeAll(){
-  modal(`<h3>Erase everything?</h3><p>This permanently deletes every record and setting from this device. It cannot be undone. Consider exporting first.</p>
-    <button class="btn danger" onclick="confirmWipe()">Erase all data</button>
-    <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">Cancel</button>`);
-}
-function confirmWipe(){ localStorage.removeItem(DB_KEY); db=load(); closeModal(); toast('All data erased'); goHome(); refreshHome(); }
-
-/* ---------- utils ---------- */
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2100);}
-function modal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalBg').classList.add('on');}
-function closeModal(){document.getElementById('modalBg').classList.remove('on');}
-document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
-function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
-function escapeAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-
-/* ---------- boot ---------- */
-function boot(){
-  buildKeys();
-  if(!db.pin){ pinMode='set';
-    document.getElementById('lockTitle').textContent='Set a PIN';
-    document.getElementById('lockSub').textContent='Choose 4–8 digits to protect your records';
-    document.getElementById('lockNote').textContent='This lock stays on your device. Anthropic and no one else can see or recover it — so pick something you\'ll remember.';
+  if (hit(q,KW.greet) && q.split(' ').length <= 4){
+    const h = new Date().getHours();
+    let g;
+    if (hit(q,['good morning','좋은 아침','아침'])) g = L.greetBack;
+    else if (hit(q,['good evening','good night','좋은 저녁','저녁'])) g = L.greetBackE;
+    else if (hit(q,['good afternoon','점심'])) g = L.greetBackA;
+    else g = h<12 ? L.greetBack : (h<18 ? L.greetBackA : L.greetBackE);
+    const left = todaysMeds().filter(m=>!isTaken(m.id)).length;
+    const med = DB.meds.length===0 ? '' : (left===0 ? ' '+L.allTaken : ' '+L.medLeft(left));
+    return `${g} ${L.today} ${dateString()}.${med}`;
   }
-  drawDots();
+
+  if (hit(q,KW.timeDate) && !hit(q,KW.medStatus)){
+    return `${L.today} ${dateString()}, ${timeString()}.`;
+  }
+
+  if (hit(q,KW.medStatus)){
+    const left = todaysMeds().filter(m=>!isTaken(m.id));
+    return left.length===0 ? L.answerMedYes : L.answerMedNo(left.map(m=>m.name).join(', '));
+  }
+
+  if (hit(q,KW.doctor))   return contactAnswer('doctor');
+  if (hit(q,KW.pharmacy)) return contactAnswer('pharmacy');
+  if (hit(q,KW.repair))   return contactAnswer('repair');
+  if (hit(q,KW.family) && hit(q,KW.call)) return contactAnswer('family');
+
+  const c = DB.contacts.find(c=>q.includes(norm(c.name)));
+  if (c) return L.answerCall(c.name,c.phone);
+
+  const n = searchNotes(q);
+  if (n) return `${n.title}: ${n.body}`;
+
+  return L.notSure;
 }
-boot();
+
+/* ---------------- conversation relay ---------------- */
+function savedContext(){
+  const L = t();
+  const lines = [];
+  const me = DB.me;
+
+  lines.push(`Today is ${dateString()}. The time is ${timeString()}.`);
+
+  if (me.name || me.addr || me.cond || me.blood){
+    lines.push('About the person:');
+    if (me.name)  lines.push(`  Name: ${me.name}`);
+    if (me.addr)  lines.push(`  Address: ${me.addr}`);
+    if (me.cond)  lines.push(`  Conditions and allergies: ${me.cond}`);
+    if (me.blood) lines.push(`  Blood type: ${me.blood}`);
+  }
+
+  if (DB.meds.length){
+    lines.push('Medicine saved in the app (taken status is for today):');
+    DB.meds.forEach(m=>{
+      lines.push(`  ${m.name} — ${L.times[m.time]||m.time}${m.note?', '+m.note:''} — ${isTaken(m.id)?'already taken today':'not taken yet today'}`);
+    });
+  } else {
+    lines.push('No medicine has been saved in the app.');
+  }
+
+  if (DB.contacts.length){
+    lines.push('Contacts saved in the app:');
+    DB.contacts.forEach(c=>lines.push(`  ${c.name} (${L.roles[c.role]||c.role}) — ${c.phone}`));
+  } else {
+    lines.push('No contacts have been saved in the app.');
+  }
+
+  if (DB.notes.length){
+    lines.push('Memory notes saved in the app:');
+    DB.notes.slice(-40).forEach(n=>lines.push(`  ${n.title}: ${n.body}`));
+  } else {
+    lines.push('No memory notes have been saved in the app.');
+  }
+
+  const cs = DB.counselor || {};
+  if (cs.name || cs.phone){
+    lines.push(`Counseling contact saved in the app: ${cs.name||''}${cs.org?' ('+cs.org+')':''}${cs.phone?' — '+cs.phone:''}`);
+  }
+  const md = DB.mood[todayKey()];
+  if (md && L.moodLabels) lines.push(`Mood the person recorded today: ${L.moodLabels[md.v]}`);
+
+  return lines.join('\n');
+}
+
+async function askAI(userText){
+  const L = t();
+  const LANG_NAME = {en:'English', ko:'Korean', es:'Spanish', ja:'Japanese'};
+  const system = `${L.sysPrompt || T.en.sysPrompt}
+
+Reply in ${LANG_NAME[DB.lang] || 'English'}.
+
+--- SAVED INFORMATION ---
+${savedContext()}
+--- END OF SAVED INFORMATION ---`;
+
+  convo.push({role:'user', content:userText});
+  if (convo.length > 8) convo = convo.slice(-8);
+
+  try{
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 20000);
+    const res = await fetch(DB.relayUrl, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ system, messages: convo }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('relay');
+    const data = await res.json();
+    const text = (data && data.text || '').trim();
+    if (!text) throw new Error('empty');
+    convo.push({role:'assistant', content:text});
+    return text;
+  }catch(e){
+    convo.pop();
+    return null;
+  }
+}
+
+function contactAnswer(role){
+  const c = DB.contacts.find(c=>c.role===role);
+  return c ? t().answerCall(c.name,c.phone) : t().notFound;
+}
+
+const STOP = new Set(['the','a','an','of','in','on','at','to','is','it','my','me','i','and','or','for','with','that','this','was','are','be','do','did','you','what','where','who','when','how','있','있는','그','저','내','나','것','수','좀']);
+
+function searchNotes(q){
+  let best = null, score = 0;
+  DB.notes.forEach(n=>{
+    let s = 0;
+    const title = norm(n.title);
+    if (title.length>1 && q.includes(title)) s += 10;
+    norm(n.title+' '+n.body).split(' ')
+      .filter(w=>w.length>2 && !STOP.has(w))
+      .forEach(w=>{ if (q.includes(w)) s += 3; });
+    if (s>score){ score=s; best=n; }
+  });
+  return score>=6 ? best : null;
+}
+
+/* ---------------- meds ---------------- */
+const todayKey = () => new Date().toISOString().slice(0,10);
+function todaysMeds(){ return DB.meds; }
+function isTaken(id){ return !!(DB.taken[todayKey()]||{})[id]; }
+async function toggleTaken(id){
+  const k = todayKey();
+  DB.taken[k] = DB.taken[k] || {};
+  DB.taken[k][id] = !DB.taken[k][id];
+  const m = DB.meds.find(m=>m.id===id);
+  if (DB.taken[k][id] && m) say(t().medTakenSay(m.name));
+  await save(); render();
+}
+
+function medRow(m,compact){
+  const on = isTaken(m.id);
+  return `<div class="item ${on?'done':''}">
+    <button class="tap ${on?'on':''}" onclick="toggleTaken('${m.id}')" aria-label="${esc(m.name)}">${on?'✔':''}</button>
+    <div class="txt"><strong>${esc(m.name)}</strong><span>${t().times[m.time]||''}${m.note?' · '+esc(m.note):''}</span></div>
+    ${compact?'':`<button class="tap del" onclick="delItem('meds','${m.id}')" aria-label="delete">🗑</button>`}
+  </div>`;
+}
+
+/* ---------------- render ---------------- */
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(){
+  const L = t();
+
+  document.getElementById('clock').textContent = timeString();
+  document.getElementById('datestr').textContent = dateString();
+  const h = new Date().getHours();
+  const g = h<12 ? L.greetM : (h<18 ? L.greetA : L.greetE);
+  document.getElementById('greeting').textContent = g + (DB.me.name ? ', '+DB.me.name : '');
+  const left = todaysMeds().filter(m=>!isTaken(m.id)).length;
+  document.getElementById('homeSummary').textContent =
+    DB.meds.length===0 ? L.noMeds : (left===0 ? L.allTaken : L.medLeft(left));
+
+  document.getElementById('homeMeds').innerHTML =
+    DB.meds.length ? DB.meds.map(m=>medRow(m,true)).join('') : `<div class="empty">${L.noMeds}</div>`;
+  document.getElementById('medList').innerHTML =
+    DB.meds.length ? DB.meds.map(m=>medRow(m,false)).join('') : `<div class="empty">${L.noMeds}</div>`;
+
+  document.getElementById('contactList').innerHTML = DB.contacts.length ? DB.contacts.map(c=>`
+    <div class="item">
+      <div class="txt"><strong>${esc(c.name)}</strong><span>${L.roles[c.role]||''} · ${esc(c.phone)}</span></div>
+      <a href="tel:${encodeURIComponent(c.phone)}"><button class="tap call" aria-label="call ${esc(c.name)}">📞</button></a>
+      <button class="tap del" onclick="delItem('contacts','${c.id}')" aria-label="delete">🗑</button>
+    </div>`).join('') : `<div class="empty">${L.noContacts}</div>`;
+
+  document.getElementById('noteList').innerHTML = DB.notes.length ? DB.notes.slice().reverse().map(n=>`
+    <div class="item">
+      <div class="txt"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span></div>
+      <button class="tap" onclick="say(${JSON.stringify(n.title+'. '+n.body).replace(/"/g,'&quot;')})" aria-label="read aloud">🔊</button>
+      <button class="tap del" onclick="delItem('notes','${n.id}')" aria-label="delete">🗑</button>
+    </div>`).join('') : `<div class="empty">${L.noNotes}</div>`;
+
+  const fam = DB.contacts.filter(c=>c.role==='family');
+  document.getElementById('sosList').innerHTML = fam.length ? fam.map(c=>`
+    <a href="tel:${encodeURIComponent(c.phone)}" style="text-decoration:none">
+      <button class="btn green" style="min-height:80px;font-size:1.25rem"><span class="ic">📞</span><span>${esc(c.name)} · ${esc(c.phone)}</span></button>
+    </a>`).join('') : `<div class="empty">${L.noSos}</div>`;
+
+  const me = DB.me;
+  document.getElementById('myInfoView').innerHTML = (me.name||me.addr||me.cond||me.blood) ? `
+    <div class="item"><div class="txt">
+      <strong>${esc(me.name||'')}</strong>
+      <span>${esc(me.addr||'')}${me.blood?' · '+esc(me.blood):''}${me.cond?'<br>'+esc(me.cond):''}</span>
+    </div></div>` : `<div class="empty">${L.noMe}</div>`;
+
+  document.getElementById('examples').innerHTML = L.examples.map(q=>
+    `<button class="btn ghost small" style="margin-top:8px" onclick="askExample(${JSON.stringify(q).replace(/"/g,'&quot;')})">
+       <span class="ic">💬</span><span>${esc(q)}</span></button>`).join('');
+
+  const ru = document.getElementById('relayUrl');
+  if (ru && document.activeElement !== ru) ru.value = DB.relayUrl || '';
+
+  renderWellness();
+  applyLangText();
+}
+
+function askExample(q){
+  go('home');
+  setHeard(q);
+  handleQuestion(q);
+}
+
+const LOC = {en:'en-US', ko:'ko-KR', es:'es-US', ja:'ja-JP'};
+function timeString(){
+  return new Date().toLocaleTimeString(LOC[DB.lang]||'en-US',{hour:'numeric',minute:'2-digit'});
+}
+function dateString(){
+  return new Date().toLocaleDateString(LOC[DB.lang]||'en-US',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+}
+
+function applyLangText(){
+  const L = t();
+  document.documentElement.lang = L.htmlLang;
+  document.getElementById('micLabel').textContent = listening ? L.micLive : L.micIdle;
+
+  const set = (id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  const ph  = (id,v)=>{ const e=document.getElementById(id); if(e) e.placeholder=v; };
+
+  set('heardLbl',L.heardLbl); set('replyLbl',L.replyLbl); set('typeAskLbl',L.typeAsk);
+  set('todayMedTitle',L.todayMed); set('medsTitle',L.medsTitle); set('medsHint',L.medsHint);
+  set('addMedLbl',L.addMed); set('lbMedName',L.mName); set('lbMedTime',L.mTime); set('lbMedNote',L.mNote);
+  set('medDisclaim',L.medDisclaim);
+  set('contactsTitle',L.contactsTitle); set('contactsHint',L.contactsHint); set('addContactLbl',L.addContact);
+  set('lbCName',L.cName); set('lbCPhone',L.cPhone); set('lbCRole',L.cRole);
+  set('notesTitle',L.notesTitle); set('notesHint',L.notesHint); set('voiceNoteLbl',L.voiceNote); set('addNoteLbl',L.addNote);
+  set('lbNTitle',L.nTitle); set('lbNBody',L.nBody);
+  set('sosTitle',L.sosTitle); set('sosHint',L.sosHint); set('call911',L.call911); set('sosSetHint',L.sosSetHint);
+  set('myInfoTitle',L.myInfo); set('editMeLbl',L.editMe);
+  set('lbMeName',L.meName); set('lbMeAddr',L.meAddr); set('lbMeCond',L.meCond); set('lbMeBlood',L.meBlood);
+  set('footTxt',L.foot);
+  /* settings */
+  set('setTitle',L.setTitle); set('setHint',L.setHint);
+  set('setTextTitle',L.setTextTitle); set('setTextBtn',L.setTextBtn);
+  set('setLangTitle',L.setLangTitle); set('setLangNote',L.setLangNote);
+  set('setBackupTitle',L.setBackupTitle); set('setBackupHint',L.setBackupHint);
+  set('setExport',L.setExport); set('setImport',L.setImport);
+  set('setAiTitle',L.setAiTitle); set('setAiHint',L.setAiHint);
+  set('lbRelay',L.lbRelay); set('setTest',L.setTest); set('setAiNote',L.setAiNote);
+  set('exLbl',L.exLbl);
+  set('setNoticeTitle',L.setNoticeTitle); set('setBack',L.setBack); set('setAboutTitle',L.setAboutTitle);
+  set('aboutText',L.about); set('disclaimerText',L.disclaimer);
+  set('frTitle',L.frTitle); set('frText',L.disclaimer); set('frOk',L.frOk);
+  /* mind wellness */
+  set('wTitle',L.wTitle); set('wHint',L.wHint); set('wMoodTitle',L.wMoodTitle);
+  set('wCheckTitle',L.wCheckTitle); set('wCheckHint',L.wCheckHint); set('wStartLbl',L.wStart);
+  set('wDisclaim',L.wDisclaim);
+  set('wShareTitle',L.wShareTitle); set('wShareHint',L.wShareHint); set('wShareBtnLbl',L.wShareBtn);
+  set('wCounselorTitle',L.wCounselorTitle); set('wCounselorHint',L.wCounselorHint); set('wEditCLbl',L.wEditC);
+  set('lbWcName',L.wcName); set('lbWcOrg',L.wcOrg); set('lbWcPhone',L.wcPhone);
+  set('sumCloseLbl',L.wClose);
+
+  ph('medName',L.ph.medName); ph('medNote',L.ph.medNote);
+  ph('cName',L.ph.cName); ph('cPhone',L.ph.cPhone);
+  ph('nTitle',L.ph.nTitle); ph('nBody',L.ph.nBody);
+  ph('meName',L.ph.meName); ph('meAddr',L.ph.meAddr);
+  ph('meCond',L.ph.meCond); ph('meBlood',L.ph.meBlood);
+
+  document.querySelectorAll('.sv').forEach(e=>e.textContent=L.save);
+  document.querySelectorAll('.cx').forEach(e=>e.textContent=L.cancel);
+  document.querySelectorAll('.navbtn .nl').forEach((e,i)=>e.textContent=L.nav[i]);
+  [...document.getElementById('medTime').options].forEach(o=>o.textContent = L.times[o.value]);
+  [...document.getElementById('cRole').options].forEach(o=>o.textContent = L.roles[o.value]);
+
+  const LB = {en:'langEn', ko:'langKo', es:'langEs', ja:'langJa'};
+  Object.keys(LB).forEach(k=>{
+    const b = document.getElementById(LB[k]);
+    if (b) b.style.borderColor = DB.lang===k ? 'var(--blue)' : 'var(--line)';
+  });
+
+  updateSizeBtn();
+}
+
+function updateSizeBtn(){
+  const steps = [1,1.15,1.3,1.45];
+  const i = Math.max(0,steps.indexOf(DB.scale||1));
+  document.getElementById('sizeBtn').textContent = t().sizeBtn + '+'.repeat(i+1);
+}
+
+/* ---------------- mind wellness (v1.4) ---------------- */
+const MOOD_EMOJI = ['😄','🙂','😐','😞','😢'];
+let wq = null; /* mind-check state; never saved mid-flow */
+
+function renderWellness(){
+  const L = t();
+  const todayMood = (DB.mood||{})[todayKey()];
+  document.getElementById('moodRow').innerHTML = MOOD_EMOJI.map((em,i)=>`
+    <button class="moodbtn ${todayMood && todayMood.v===i ? 'on':''}" onclick="saveMood(${i})">
+      <span class="em">${em}</span><span>${esc(L.moodLabels[i])}</span>
+    </button>`).join('');
+  document.getElementById('moodStatus').textContent = todayMood ? L.wMoodSaved : '';
+
+  const c = DB.counselor || {};
+  document.getElementById('counselorView').innerHTML = (c.name || c.phone) ? `
+    <div class="item">
+      <div class="txt"><strong>${esc(c.name||'')}</strong><span>${esc(c.org||'')}${c.phone?' · '+esc(c.phone):''}</span></div>
+      ${c.phone ? `<a href="tel:${encodeURIComponent(c.phone)}"><button class="tap call" aria-label="call counselor">📞</button></a>` : ''}
+    </div>` : `<div class="empty">${L.noCounselorTxt}</div>`;
+
+  if (!wq) document.getElementById('wCheckArea').innerHTML = '';
+}
+
+async function saveMood(i){
+  DB.mood = DB.mood || {};
+  DB.mood[todayKey()] = { v:i, at:Date.now() };
+  await save(); renderWellness();
+  say(t().wMoodSaved);
+}
+
+function startCheck(){
+  wq = { step:1, s1:0 };
+  drawCheck();
+}
+
+function drawCheck(){
+  const L = t();
+  const q = wq.step===1 ? L.q1 : L.q2;
+  document.getElementById('wCheckArea').innerHTML = `
+    <div class="qtext">${esc(q)}</div>
+    ${L.opts.map((o,i)=>`<button class="optbtn" onclick="answerCheck(${i})">${esc(o)}</button>`).join('')}`;
+  say(q);
+}
+
+async function answerCheck(v){
+  const L = t();
+  if (!wq) return;
+  if (wq.step===1){ wq.s1 = v; wq.step = 2; drawCheck(); return; }
+  const total = wq.s1 + v;
+  DB.checks = DB.checks || [];
+  DB.checks.push({ at:Date.now(), s1:wq.s1, s2:v });
+  if (DB.checks.length > 24) DB.checks = DB.checks.slice(-24);
+  wq = null;
+  await save();
+  const high = total >= 3;
+  const msg = high ? L.wResultHigh : L.wResultLow;
+  document.getElementById('wCheckArea').innerHTML = `
+    <div class="transcript answer" style="margin-top:14px">${esc(msg)}</div>
+    ${high ? `<div class="warn" style="margin-top:10px">${esc(L.wCrisis)} <a href="tel:988" style="font-weight:800">988</a></div>` : ''}`;
+  say(high ? msg + ' ' + L.wCrisis : msg);
+}
+
+function openSummary(){
+  const L = t();
+  const loc = LOC[DB.lang] || 'en-US';
+  document.getElementById('sumTitle').textContent = L.wSummaryTitle;
+  document.getElementById('sumCloseLbl').textContent = L.wClose;
+
+  const days = [];
+  for (let d=0; d<28; d++){
+    const dt = new Date(Date.now() - d*86400000);
+    const k = dt.toISOString().slice(0,10);
+    const m = (DB.mood||{})[k];
+    if (m) days.push(`<div class="item"><div class="txt"><strong>${dt.toLocaleDateString(loc,{month:'short',day:'numeric',weekday:'short'})}</strong><span style="font-size:1.05rem">${MOOD_EMOJI[m.v]} ${esc(L.moodLabels[m.v])}</span></div></div>`);
+  }
+  const checks = (DB.checks||[]).slice(-10).reverse().map(c=>{
+    const total = (c.s1||0)+(c.s2||0);
+    return `<div class="item"><div class="txt"><strong>${new Date(c.at).toLocaleDateString(loc,{month:'short',day:'numeric'})}</strong><span>${esc(L.checkScore(total))}</span></div></div>`;
+  });
+
+  document.getElementById('sumBody').innerHTML = `
+    <h3 style="margin:12px 0 8px">${esc(L.wMoodSec)}</h3>
+    ${days.length ? days.join('') : `<div class="empty">${L.wNoData}</div>`}
+    <h3 style="margin:16px 0 8px">${esc(L.wCheckSec)}</h3>
+    ${checks.length ? checks.join('') : `<div class="empty">${L.wNoData}</div>`}
+    <p class="tiny" style="margin-top:12px">${esc(L.wDisclaim)}</p>`;
+  document.getElementById('sumModal').classList.add('on');
+}
+
+async function saveCounselor(){
+  DB.counselor = {
+    name:document.getElementById('wcName').value.trim(),
+    org:document.getElementById('wcOrg').value.trim(),
+    phone:document.getElementById('wcPhone').value.trim()
+  };
+  await save(); showForm(null); render(); say(t().savedShort);
+}
+
+/* ---------------- actions ---------------- */
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+function showForm(which){
+  ['med','contact','note','me','wc'].forEach(f=>{
+    const el = document.getElementById(f+'Form');
+    if (el) el.style.display = (f===which) ? 'block' : 'none';
+  });
+  if (which==='me'){
+    document.getElementById('meName').value = DB.me.name||'';
+    document.getElementById('meAddr').value = DB.me.addr||'';
+    document.getElementById('meCond').value = DB.me.cond||'';
+    document.getElementById('meBlood').value = DB.me.blood||'';
+  }
+  if (which==='wc'){
+    const c = DB.counselor||{};
+    document.getElementById('wcName').value = c.name||'';
+    document.getElementById('wcOrg').value = c.org||'';
+    document.getElementById('wcPhone').value = c.phone||'';
+  }
+}
+
+async function saveMed(){
+  const name = document.getElementById('medName').value.trim();
+  if (!name){ alert(t().needName); return; }
+  DB.meds.push({id:uid(),name,time:document.getElementById('medTime').value,note:document.getElementById('medNote').value.trim()});
+  document.getElementById('medName').value=''; document.getElementById('medNote').value='';
+  await save(); showForm(null); render(); say(t().savedShort);
+}
+
+async function saveContact(){
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  if (!name){ alert(t().needName); return; }
+  if (!phone){ alert(t().needPhone); return; }
+  DB.contacts.push({id:uid(),name,phone,role:document.getElementById('cRole').value});
+  document.getElementById('cName').value=''; document.getElementById('cPhone').value='';
+  await save(); showForm(null); render(); say(t().savedShort);
+}
+
+async function saveNote(){
+  const title = document.getElementById('nTitle').value.trim();
+  const body = document.getElementById('nBody').value.trim();
+  if (!title && !body) return;
+  DB.notes.push({id:uid(),title:title||body.slice(0,14),body,at:Date.now()});
+  document.getElementById('nTitle').value=''; document.getElementById('nBody').value='';
+  await save(); showForm(null); render(); say(t().noteSaved);
+}
+
+function voiceNote(){ startListen('note'); go('home'); }
+
+async function captureNote(text){
+  const title = text.split(/[\s,]/).slice(0,3).join(' ');
+  DB.notes.push({id:uid(),title,body:text,at:Date.now()});
+  await save(); render();
+  setReply(t().noteSaved+' '+text);
+  say(t().noteSaved);
+}
+
+async function saveMe(){
+  DB.me = {
+    name:document.getElementById('meName').value.trim(),
+    addr:document.getElementById('meAddr').value.trim(),
+    cond:document.getElementById('meCond').value.trim(),
+    blood:document.getElementById('meBlood').value.trim()
+  };
+  await save(); showForm(null); render(); say(t().savedShort);
+}
+
+async function delItem(kind,id){
+  if (!confirm(t().confirmDel)) return;
+  DB[kind] = DB[kind].filter(x=>x.id!==id);
+  await save(); render();
+}
+
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    if (b.dataset.v===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0,0);
+}
+
+async function setLang(l){
+  DB.lang = l;
+  await save(); render();
+}
+
+async function bumpScale(){
+  const steps = [1,1.15,1.3,1.45];
+  const i = steps.indexOf(DB.scale||1);
+  DB.scale = steps[(i+1)%steps.length];
+  document.documentElement.style.setProperty('--scale',DB.scale);
+  updateSizeBtn();
+  await save();
+}
+
+/* ---------------- conversation settings ---------------- */
+function relayNote(msg,ok){
+  document.getElementById('relayStatus').innerHTML = msg
+    ? `<div class="${ok?'notice':'warn'}">${esc(msg)}</div>` : '';
+}
+
+async function saveRelay(){
+  const v = document.getElementById('relayUrl').value.trim();
+  DB.relayUrl = v;
+  convo = [];
+  await save();
+  relayNote(v ? t().relaySaved : t().relayCleared, true);
+  render();
+}
+
+async function testRelay(){
+  const v = document.getElementById('relayUrl').value.trim();
+  if (!v){ relayNote(t().relayCleared,true); return; }
+  relayNote(t().thinking,true);
+  try{
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 15000);
+    const res = await fetch(v, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ system:'Reply with the single word: ready', messages:[{role:'user',content:'ready?'}] }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (!res.ok || !data || !data.text) throw new Error('bad');
+    DB.relayUrl = v; convo = [];
+    await save();
+    relayNote(t().relayOk,true);
+    render();
+  }catch(e){
+    relayNote(t().relayBad,false);
+  }
+}
+
+/* ---------------- backup / restore ---------------- */
+function exportData(){
+  const payload = { app:'mind-companion', version:APP_VERSION, exported:new Date().toISOString(), data:DB };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mind-companion-backup-${todayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  alert(t().exportOk);
+}
+
+function importData(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = async ()=>{
+    try{
+      const p = JSON.parse(r.result);
+      const d = (p && p.app==='mind-companion' && p.data) ? p.data : null;
+      if (!d || !Array.isArray(d.meds)) throw new Error('bad file');
+      if (!confirm(t().importAsk)) return;
+      DB = Object.assign({meds:[],contacts:[],notes:[],taken:{},me:{},lang:'en',scale:1,agreed:true,mood:{},checks:[],counselor:{}}, d);
+      document.documentElement.style.setProperty('--scale',DB.scale||1);
+      await save(); render();
+      alert(t().importOk);
+    }catch(e){ alert(t().importBad); }
+    ev.target.value = '';
+  };
+  r.readAsText(file);
+}
+
+/* ---------------- first-run notice ---------------- */
+async function acceptNotice(){
+  DB.agreed = true;
+  await save();
+  document.getElementById('firstRun').classList.remove('on');
+}
+
+/* ---------------- boot ---------------- */
+(async function(){
+  await load();
+  render();
+  if (!DB.agreed) document.getElementById('firstRun').classList.add('on');
+  setInterval(()=>{ document.getElementById('clock').textContent = timeString(); },10000);
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    try{ navigator.serviceWorker.register('./sw.js'); }catch(e){}
+  }
+})();
 </script>
 </body>
 </html>
