@@ -1155,11 +1155,26 @@ function exportData(){
   toast('Exported');
 }
 function wipeAll(){
-  modal(`<h3>Erase everything?</h3><p>This permanently deletes every record and setting from this device. It cannot be undone. Consider exporting first.</p>
+  modal(`<h3>Erase everything?</h3><p>This permanently deletes every record and setting from this device, and removes the offline copy of the app. It cannot be undone. Consider exporting first.</p>
     <button class="btn danger" onclick="confirmWipe()">Erase all data</button>
     <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">Cancel</button>`);
 }
-function confirmWipe(){ localStorage.removeItem(DB_KEY); db=load(); closeModal(); toast('All data erased'); goHome(); refreshHome(); }
+async function confirmWipe(){
+  localStorage.removeItem(DB_KEY);
+  // remove the offline copy of the app and its worker as well, so "erase
+  // everything" leaves nothing behind on this device
+  try{
+    if (window.caches){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if (navigator.serviceWorker){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  }catch(e){}
+  db=load(); closeModal(); toast('All data erased'); goHome(); refreshHome();
+}
 
 /* ---------- utils ---------- */
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2100);}
@@ -1170,12 +1185,19 @@ function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt
 function escapeAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
 /* ---------- boot ---------- */
+const APP_VERSION = '1.0';
+
 function boot(){
   buildKeys();
+  // offline shell cache — the app keeps working with no signal.
+  // It caches the app only; records stay in localStorage and are never cached.
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    try{ navigator.serviceWorker.register('./sw.js'); }catch(e){}
+  }
   if(!db.pin){ pinMode='set';
     document.getElementById('lockTitle').textContent='Set a PIN';
     document.getElementById('lockSub').textContent='Choose 4–8 digits to protect your records';
-    document.getElementById('lockNote').textContent='This lock stays on your device. Anthropic and no one else can see or recover it — so pick something you\'ll remember.';
+    document.getElementById('lockNote').textContent='This lock stays on your device. No one — not the app, not its author, not anyone — can see or recover it, so pick something you\'ll remember.';
   }
   drawDots();
 }
