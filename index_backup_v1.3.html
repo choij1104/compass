@@ -105,7 +105,7 @@ input,select,textarea{
 textarea{min-height:96px;resize:vertical;}
 
 nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-left)) max(6px,env(safe-area-inset-bottom));}
-.navinner{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;}
+.navinner{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;}
 .navbtn{border:none;background:none;cursor:pointer;color:var(--ink-soft);padding:8px 2px;border-radius:12px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.72rem;font-weight:700;}
 .navbtn .ic{font-size:1.5rem;line-height:1;}
 .navbtn[aria-current="page"]{color:var(--blue);background:#EAF1FD;}
@@ -117,19 +117,6 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top
 .notice{background:#F7F9FC;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:.9rem;color:var(--ink-soft);line-height:1.55;}
 .foot{text-align:center;color:var(--ink-soft);font-size:.82rem;padding:6px 0 18px;}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
-
-/* simple mode (caregiver toggle) */
-body.simple .navbtn[data-v="notes"], body.simple .navbtn[data-v="well"]{display:none;}
-body.simple .navinner{grid-template-columns:repeat(4,1fr);}
-
-/* mind wellness */
-.moodrow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;}
-.moodbtn{border:2px solid var(--line);background:#fff;border-radius:14px;min-height:84px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.7rem;font-weight:700;color:var(--ink-soft);padding:6px 2px;}
-.moodbtn .em{font-size:1.7rem;line-height:1;}
-.moodbtn.on{border-color:var(--green);background:#EAF6EE;color:var(--ink);}
-.optbtn{display:block;width:100%;min-height:60px;margin-top:10px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:1.02rem;font-weight:700;cursor:pointer;padding:12px;text-align:left;}
-.optbtn:active{transform:scale(.985);}
-.qtext{font-size:1.08rem;font-weight:700;margin-top:14px;}
 
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(12,22,36,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
@@ -155,7 +142,6 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
     <div class="card">
       <div class="clock" id="clock">--:--</div>
       <div class="datestr" id="datestr"></div>
-      <div class="datestr" id="podLine" style="font-weight:700"></div>
       <h2 id="greeting" style="margin-top:14px"></h2>
       <p class="muted" id="homeSummary"></p>
     </div>
@@ -289,50 +275,6 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
     </div>
   </section>
 
-  <!-- ================= MIND WELLNESS ================= -->
-  <section class="view" id="v-well">
-    <div class="card">
-      <h2 id="wTitle">💚 My mind</h2>
-      <p class="muted" id="wHint"></p>
-      <h3 id="wMoodTitle" style="margin-top:16px">How is your mood today?</h3>
-      <div class="moodrow" id="moodRow"></div>
-      <p class="muted" id="moodStatus" style="margin-top:10px"></p>
-    </div>
-
-    <div class="card">
-      <h3 id="wCheckTitle">Mind check</h3>
-      <p class="muted" id="wCheckHint"></p>
-      <button class="btn ghost" onclick="startCheck()"><span class="ic">📋</span><span id="wStartLbl">Answer the two questions</span></button>
-      <div id="wCheckArea"></div>
-      <p class="tiny" id="wDisclaim" style="margin-top:14px"></p>
-    </div>
-
-    <div class="card">
-      <h3 id="wShareTitle">Show at counseling</h3>
-      <p class="muted" id="wShareHint"></p>
-      <button class="btn" onclick="openSummary()"><span class="ic">📄</span><span id="wShareBtnLbl">Open the summary page</span></button>
-    </div>
-
-    <div class="card">
-      <h3 id="wCounselorTitle">Counseling contact</h3>
-      <p class="muted" id="wCounselorHint"></p>
-      <div id="counselorView" style="margin-top:12px"></div>
-      <button class="btn ghost small" onclick="showForm('wc')"><span class="ic">✏️</span><span id="wEditCLbl">Edit counseling contact</span></button>
-      <div id="wcForm" style="display:none">
-        <label id="lbWcName">Counselor name</label>
-        <input id="wcName">
-        <label id="lbWcOrg">Organization / clinic</label>
-        <input id="wcOrg">
-        <label id="lbWcPhone">Phone number</label>
-        <input id="wcPhone" type="tel" inputmode="tel" placeholder="210-555-0100">
-        <div class="row2" style="margin-top:14px">
-          <button class="btn green small" onclick="saveCounselor()"><span class="ic">✔</span><span class="sv">Save</span></button>
-          <button class="btn ghost small" onclick="showForm(null)"><span class="ic">✕</span><span class="cx">Cancel</span></button>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ================= SETTINGS ================= -->
   <section class="view" id="v-settings">
     <div class="card">
@@ -350,10 +292,6 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
       <div class="row2">
         <button class="btn ghost small" id="langEn" onclick="setLang('en')"><span class="ic">🇺🇸</span><span>English</span></button>
         <button class="btn ghost small" id="langKo" onclick="setLang('ko')"><span class="ic">🇰🇷</span><span>한국어</span></button>
-      </div>
-      <div class="row2" style="margin-top:10px">
-        <button class="btn ghost small" id="langEs" onclick="setLang('es')"><span class="ic">🇲🇽</span><span>Español</span></button>
-        <button class="btn ghost small" id="langJa" onclick="setLang('ja')"><span class="ic">🇯🇵</span><span>日本語</span></button>
       </div>
       <p class="tiny" id="setLangNote" style="margin-top:10px"></p>
     </div>
@@ -380,15 +318,6 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
     </div>
 
     <div class="card">
-      <h3 id="cgTitle">Caregiver · program staff</h3>
-      <p class="muted" id="cgHint"></p>
-      <button class="btn ghost" onclick="toggleSimple()"><span class="ic">🧭</span><span id="simpleBtnLbl"></span></button>
-      <p class="tiny" id="simpleHintTxt"></p>
-      <button class="btn green small" onclick="exportReport()"><span class="ic">📄</span><span id="reportBtnLbl"></span></button>
-      <button class="btn ghost small" onclick="exportCsv()"><span class="ic">📊</span><span id="csvBtnLbl"></span></button>
-    </div>
-
-    <div class="card">
       <h3 id="setNoticeTitle">Important notice</h3>
       <div class="notice" id="disclaimerText"></div>
       <button class="btn ghost small" onclick="go('home')"><span class="ic">←</span><span id="setBack">Back to home</span></button>
@@ -401,7 +330,7 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
   </section>
 
   <div class="foot">
-    <span id="footTxt">All information stays on this device.</span><br>Mind Companion v1.5 · © 2026 Jae Hyek Choi / HAKOYA LLC. All rights reserved.
+    <span id="footTxt">All information stays on this device.</span><br>Mind Companion v1.3
   </div>
 </div>
 
@@ -411,19 +340,9 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
     <button class="navbtn" data-v="meds" onclick="go('meds')"><span class="ic">💊</span><span class="nl">Medicine</span></button>
     <button class="navbtn" data-v="contacts" onclick="go('contacts')"><span class="ic">📞</span><span class="nl">Contacts</span></button>
     <button class="navbtn" data-v="notes" onclick="go('notes')"><span class="ic">📝</span><span class="nl">Notes</span></button>
-    <button class="navbtn" data-v="well" onclick="go('well')"><span class="ic">💚</span><span class="nl">Mind</span></button>
     <button class="navbtn" data-v="sos" onclick="go('sos')"><span class="ic">🚑</span><span class="nl">Help</span></button>
   </div>
 </nav>
-
-<!-- counseling summary -->
-<div class="modal" id="sumModal">
-  <div class="modalbox">
-    <h2 id="sumTitle"></h2>
-    <div id="sumBody"></div>
-    <button class="btn ghost" onclick="document.getElementById('sumModal').classList.remove('on')"><span class="ic">✕</span><span id="sumCloseLbl">Close</span></button>
-  </div>
-</div>
 
 <!-- first-run notice -->
 <div class="modal" id="firstRun">
@@ -438,20 +357,13 @@ body.simple .navinner{grid-template-columns:repeat(4,1fr);}
 
 <script>
 /* =====================================================================
-   Mind Companion v1.5
-   Copyright (c) 2026 Jae Hyek Choi / HAKOYA LLC. All rights reserved.
-   Proprietary software — see LICENSE. Not a medical device.
+   Mind Companion v1.3
    A private, offline-first memory aid for older adults.
-   Default language: English. Korean, Spanish, and Japanese available in Settings.
-   v1.4: Mind Wellness section — daily mood log, two-question mind check,
-         counseling summary page, and counseling contact.
-   v1.5: Dementia-informed updates — time-of-day orientation line, "who am I /
-         where do I live" voice answers, caregiver tools (Simple Mode,
-         4-week report file, CSV data export).
+   Default language: English. Korean available in Settings.
    Storage: artifact storage -> localStorage -> memory.
    ===================================================================== */
 
-const APP_VERSION = '1.5';
+const APP_VERSION = '1.3';
 
 /* ---------------- storage layer ---------------- */
 const mem = {};
@@ -479,7 +391,7 @@ const store = {
 };
 
 /* ---------------- state ---------------- */
-let DB = { meds:[], contacts:[], notes:[], taken:{}, me:{}, lang:'en', scale:1, agreed:false, relayUrl:'', mood:{}, checks:[], counselor:{}, simpleMode:false };
+let DB = { meds:[], contacts:[], notes:[], taken:{}, me:{}, lang:'en', scale:1, agreed:false, relayUrl:'' };
 
 /* short-lived conversation memory (this session only, never saved) */
 let convo = [];
@@ -510,7 +422,7 @@ en:{
   myInfo:'My information (show to paramedics)', editMe:'Edit my information',
   meName:'Name', meAddr:'Address', meCond:'Conditions · allergies', meBlood:'Blood type',
   save:'Save', cancel:'Cancel', foot:'All information stays on this device.',
-  nav:['Home','Medicine','Contacts','Notes','Mind','Help'],
+  nav:['Home','Medicine','Contacts','Notes','Help'],
   times:{morning:'Morning',noon:'Noon',evening:'Evening',night:'Bedtime'},
   roles:{family:'Family',doctor:'Doctor · clinic',pharmacy:'Pharmacy',repair:'Repair · service',friend:'Friend · neighbor',other:'Other'},
   ph:{medName:'e.g., Blood pressure pill', medNote:'e.g., 30 minutes after a meal',
@@ -570,50 +482,6 @@ en:{
   relayCleared:'Connection removed. The app will use its built-in answers.',
   relaySaved:'Saved.',
   aiFail:'I could not connect just now, so I will answer from what is saved here.',
-  /* mind wellness */
-  wTitle:'💚 My mind', wHint:'A small daily note of how you are feeling. You can show it at counseling.',
-  wMoodTitle:'How is your mood today?',
-  moodLabels:['Very good','Good','Okay','A bit low','Very hard'],
-  wMoodSaved:'Thank you. I wrote down how you feel today.',
-  wCheckTitle:'Mind check', wCheckHint:'Two short questions about the last two weeks. This is not a test — there are no wrong answers.',
-  wStart:'Answer the two questions',
-  q1:'Over the last two weeks, how often have you felt down, depressed, or hopeless?',
-  q2:'Over the last two weeks, how often have you felt little interest or pleasure in doing things?',
-  opts:['Not at all','Several days','More than half the days','Nearly every day'],
-  wResultLow:'Thank you for answering. Your mind seems to be doing okay. Checking in like this now and then is a good habit.',
-  wResultHigh:'Thank you for answering. It sounds like your heart has been heavy lately. Talking with the counselor can really help — the counseling contact is below.',
-  wCrisis:'If it ever feels like too much, you can call or text 988 at any time, day or night. A kind person will listen.',
-  wDisclaim:'This check is a simple self-reflection, not a medical test or a diagnosis. If you are worried about your mood, please talk with your counselor or doctor.',
-  wShareTitle:'Show at counseling', wShareHint:'One page with your recent moods and answers, in large text.', wShareBtn:'Open the summary page',
-  wCounselorTitle:'Counseling contact', wCounselorHint:'Your counselor\'s information will appear here. A family member or staff can add it.',
-  wcName:'Counselor name', wcOrg:'Organization / clinic', wcPhone:'Phone number', wEditC:'Edit counseling contact',
-  noCounselorTxt:'The counseling contact has not been added yet.',
-  wSummaryTitle:'My recent mind (last 4 weeks)',
-  wMoodSec:'Daily mood', wCheckSec:'Mind check answers',
-  checkScore:n=>`Check result ${n} / 6`,
-  wNoData:'Nothing recorded yet.',
-  wClose:'Close',
-  /* v1.5 orientation + caregiver */
-  pods:['morning','daytime','evening','night'],
-  nowIs:p=>`It is ${p} now.`,
-  myNameIs:n=>`Your name is ${n}.`,
-  myAddrIs:a=>`Your home address is ${a}.`,
-  noMeSaved:'That is not written down yet. A family member can add it on the Help screen.',
-  cgTitle:'Caregiver · program staff',
-  cgHint:'Tools for a family member or program staff. The person using the app does not need this section.',
-  simpleTitle:'Simple mode',
-  simpleHint:'Shows only Home, Medicine, Contacts, and Help. Nothing is deleted — turn it off to see Notes and Mind again.',
-  onWord:'On', offWord:'Off',
-  reportBtn:'Save 4-week report', csvBtn:'Save data file (CSV)',
-  rTitle:'Mind Companion — 4-week report',
-  rGenerated:'Created',
-  rMedsSec:'Medicine marked as taken',
-  rMedLine:(n,c)=>`${n}: marked on ${c} of the last 28 days`,
-  rMedNote:'Marks are made by the person in the app. They show engagement with the app, not verified intake.',
-  rFlags:'Points to discuss',
-  rFlagMood:'Low mood recorded on the 3 most recent recorded days.',
-  rFlagCheck:'The latest mind check suggests talking with the counselor.',
-  rNoFlag:'No special notes.',
   sysPrompt:`You are a warm, patient companion for an older adult who may have memory difficulty. You are speaking through a phone app; your reply is read aloud.
 
 HOW TO SPEAK
@@ -651,7 +519,7 @@ ko:{
   myInfo:'내 정보 (구급대원에게 보여주세요)', editMe:'내 정보 수정',
   meName:'이름', meAddr:'주소', meCond:'지병 · 알레르기', meBlood:'혈액형',
   save:'저장', cancel:'취소', foot:'모든 정보는 이 기기 안에만 저장됩니다.',
-  nav:['홈','약','연락처','노트','마음','도움'],
+  nav:['홈','약','연락처','노트','도움'],
   times:{morning:'아침',noon:'점심',evening:'저녁',night:'자기 전'},
   roles:{family:'가족',doctor:'의사 · 병원',pharmacy:'약국',repair:'수리 · 서비스',friend:'친구 · 이웃',other:'기타'},
   ph:{medName:'예: 혈압약', medNote:'예: 식후 30분',
@@ -709,50 +577,6 @@ ko:{
   relayCleared:'연결을 해제했습니다. 기본 답변만 사용합니다.',
   relaySaved:'저장했습니다.',
   aiFail:'지금은 연결이 되지 않아, 저장된 내용으로만 답해 드리겠습니다.',
-  /* mind wellness */
-  wTitle:'💚 마음', wHint:'오늘 기분을 간단히 기록합니다. 상담받을 때 보여드릴 수 있습니다.',
-  wMoodTitle:'오늘 기분이 어떠세요?',
-  moodLabels:['아주 좋아요','좋아요','그저 그래요','조금 힘들어요','많이 힘들어요'],
-  wMoodSaved:'고맙습니다. 오늘 기분을 적어 두었습니다.',
-  wCheckTitle:'마음 점검', wCheckHint:'지난 2주에 대한 짧은 질문 두 가지입니다. 시험이 아니니 편하게 답하세요.',
-  wStart:'두 가지 질문에 답하기',
-  q1:'지난 2주 동안, 기분이 가라앉거나 우울하거나 희망이 없다고 느낀 적이 얼마나 자주 있었나요?',
-  q2:'지난 2주 동안, 일에 흥미나 즐거움이 없었던 적이 얼마나 자주 있었나요?',
-  opts:['전혀 없었다','며칠 있었다','2주의 절반 이상','거의 매일'],
-  wResultLow:'답해 주셔서 고맙습니다. 마음이 비교적 잘 지내고 계신 것 같습니다. 가끔 이렇게 살펴보는 것이 좋은 습관입니다.',
-  wResultHigh:'답해 주셔서 고맙습니다. 요즘 마음이 많이 무거우신 것 같습니다. 상담 선생님과 이야기 나누시면 큰 도움이 됩니다. 아래 상담 연락처를 눌러 보세요.',
-  wCrisis:'마음이 너무 힘들 때는 밤낮 언제든 988로 전화하거나 문자할 수 있습니다. 한국어 통역도 됩니다.',
-  wDisclaim:'이 점검은 간단한 자기 살핌이며, 의학적 검사나 진단이 아닙니다. 마음이 걱정되시면 상담 선생님이나 의사와 이야기해 주세요.',
-  wShareTitle:'상담 때 보여드리기', wShareHint:'최근 기분과 답변을 큰 글씨 한 화면으로 정리합니다.', wShareBtn:'정리 화면 열기',
-  wCounselorTitle:'상담 연락처', wCounselorHint:'상담 선생님의 정보가 여기에 표시됩니다. 가족이나 담당자가 넣어 드립니다.',
-  wcName:'상담 선생님 성함', wcOrg:'소속 / 기관', wcPhone:'전화번호', wEditC:'상담 연락처 입력',
-  noCounselorTxt:'상담 연락처가 아직 등록되지 않았습니다.',
-  wSummaryTitle:'나의 최근 마음 (지난 4주)',
-  wMoodSec:'매일 기분', wCheckSec:'마음 점검 답변',
-  checkScore:n=>`점검 결과 ${n} / 6`,
-  wNoData:'아직 기록이 없습니다.',
-  wClose:'닫기',
-  /* v1.5 orientation + caregiver */
-  pods:['아침','낮','저녁','밤'],
-  nowIs:p=>`지금은 ${p}입니다.`,
-  myNameIs:n=>`어르신 성함은 ${n}입니다.`,
-  myAddrIs:a=>`집 주소는 ${a}입니다.`,
-  noMeSaved:'아직 적혀 있지 않습니다. 도움 화면에서 가족이 넣어 드릴 수 있습니다.',
-  cgTitle:'보호자 · 관리자',
-  cgHint:'가족이나 프로그램 담당자를 위한 도구입니다. 어르신이 직접 쓰실 필요는 없습니다.',
-  simpleTitle:'간단 모드',
-  simpleHint:'홈·약·연락처·도움만 보이게 합니다. 지워지는 것은 없으며, 끄면 노트와 마음이 다시 보입니다.',
-  onWord:'켜짐', offWord:'꺼짐',
-  reportBtn:'4주 보고서 저장', csvBtn:'데이터 파일 저장 (CSV)',
-  rTitle:'Mind Companion — 4주 보고서',
-  rGenerated:'작성일',
-  rMedsSec:'약 복용 표시',
-  rMedLine:(n,c)=>`${n}: 최근 28일 중 ${c}일 표시`,
-  rMedNote:'어르신이 앱에서 직접 누른 기록으로, 실제 복용을 확인하는 자료는 아닙니다.',
-  rFlags:'상담 시 참고',
-  rFlagMood:'최근 기록된 3일 연속으로 힘든 기분이 기록되었습니다.',
-  rFlagCheck:'최근 마음 점검 결과, 상담 선생님과 이야기해 보시길 권합니다.',
-  rNoFlag:'특이 사항 없음.',
   sysPrompt:`당신은 기억이 예전 같지 않으신 어르신 곁을 지키는 다정하고 인내심 있는 말벗입니다. 휴대폰 앱을 통해 이야기하며, 당신의 답변은 소리로 읽어 드립니다.
 
 말하는 방식
@@ -772,246 +596,6 @@ ko:{
 - 건강, 증상, 통증, 약에 관한 판단은 따뜻하게 의사나 약사에게 여쭤보시도록 안내하세요.
 - 가슴 통증, 숨쉬기 힘듦, 한쪽 몸에 힘이 빠짐, 넘어짐, 출혈 등 응급으로 들리는 말씀을 하시면, 지금 바로 911에 전화하시라고 분명히 말씀드리고 앱의 빨간 도움 버튼을 알려 드리세요.
 - 외로워하거나 슬퍼하거나 두려워하시면, 잘 들어드리고 가족에게 전화해 보시라고 부드럽게 권하세요.`
-},
-es:{
-  htmlLang:'es', voice:'es-US', sizeBtn:'A',
-  greetM:'Buenos días', greetA:'Buenas tardes', greetE:'Buenas noches',
-  micIdle:'Presione y hable', micLive:'Escuchando… presione de nuevo para terminar',
-  heardLbl:'Escuché', replyLbl:'Respuesta', typeAsk:'Escribir una pregunta',
-  todayMed:'Medicinas de hoy', medsTitle:'💊 Medicinas', medsHint:'Toque el cuadro grande cuando la haya tomado.',
-  addMed:'Agregar medicina', mName:'Nombre de la medicina', mTime:'Cuándo tomarla', mNote:'Nota (opcional)',
-  medDisclaim:'Esta lista es solo un recordatorio. No suena alarmas y no reemplaza las indicaciones de su médico o farmacéutico.',
-  contactsTitle:'📞 Contactos', contactsHint:'Presione el botón verde para llamar de inmediato.',
-  addContact:'Agregar contacto', cName:'Nombre', cPhone:'Número de teléfono', cRole:'Relación / función',
-  notesTitle:'📝 Notas de memoria', notesHint:'Escriba dónde están las cosas o algo importante — luego pregunte por voz.',
-  voiceNote:'Hablar para escribir', addNote:'Escribir con teclado', nTitle:'Título (la palabra que va a preguntar)', nBody:'Detalles',
-  sosTitle:'🚑 Pedir ayuda', sosHint:'Presione el botón grande en una emergencia.', call911:'Llamar al 911',
-  sosSetHint:'Los contactos guardados como familia aparecen aquí.',
-  myInfo:'Mi información (muéstrela a los paramédicos)', editMe:'Editar mi información',
-  meName:'Nombre', meAddr:'Dirección', meCond:'Enfermedades · alergias', meBlood:'Tipo de sangre',
-  save:'Guardar', cancel:'Cancelar', foot:'Toda la información se guarda solo en este aparato.',
-  nav:['Inicio','Medicinas','Contactos','Notas','Ánimo','Ayuda'],
-  times:{morning:'Mañana',noon:'Mediodía',evening:'Tarde',night:'Antes de dormir'},
-  roles:{family:'Familia',doctor:'Médico · clínica',pharmacy:'Farmacia',repair:'Reparación · servicio',friend:'Amigo · vecino',other:'Otro'},
-  ph:{medName:'ej.: Pastilla para la presión', medNote:'ej.: 30 minutos después de comer',
-      cName:'ej.: María (hija)', cPhone:'210-555-0100',
-      nTitle:'ej.: Pasaporte', nBody:'ej.: Segundo cajón de la cómoda',
-      meName:'Nombre completo', meAddr:'Dirección de casa',
-      meCond:'ej.: Presión alta, alergia a la penicilina', meBlood:'ej.: O+'},
-  noMeds:'Todavía no hay medicinas. Agregue una abajo.',
-  noContacts:'Todavía no hay contactos.',
-  noNotes:'Todavía no hay notas. Pruebe hablar una nota.',
-  noSos:'Primero agregue un contacto de familia.',
-  noMe:'Todavía no hay información.',
-  allTaken:'Ya tomó todas sus medicinas de hoy. Muy bien.',
-  medLeft:n=>`Faltan ${n} por tomar.`,
-  askPrompt:'¿Qué le gustaría saber?',
-  notFound:'Eso todavía no lo sé. Escríbalo en Notas y lo recordaré la próxima vez.',
-  sttNo:'Este navegador no permite hablar. Use Chrome o Safari, o presione «Escribir una pregunta» abajo.',
-  sttDenied:'El micrófono está bloqueado. Permita el micrófono en la configuración del navegador.',
-  sttNoSpeech:'No escuché nada. Presione el botón y hable de nuevo.',
-  sttNet:'Se necesita conexión a internet. Revise su conexión.',
-  confirmDel:'¿Borrar esto?',
-  noteSaved:'Anotado.', savedShort:'Guardado.',
-  needName:'Escriba un nombre, por favor.', needPhone:'Escriba un número de teléfono, por favor.',
-  medTakenSay:n=>`${n} marcada como tomada.`,
-  answerMedYes:'Hoy ya tomó todas sus medicinas.',
-  answerMedNo:list=>`Todavía no ha tomado ${list}.`,
-  answerCall:(n,p)=>`${n}, ${p}. Presione el botón verde en la pantalla de Contactos para llamar.`,
-  today:'Hoy es',
-  setTitle:'⚙️ Configuración', setHint:'Normalmente un familiar configura esto una sola vez.',
-  setTextTitle:'Tamaño de letra', setTextBtn:'Hacer la letra más grande',
-  setLangTitle:'Idioma', setLangNote:'Al cambiar el idioma, también cambia la voz para escuchar y hablar.',
-  setBackupTitle:'Copia de seguridad',
-  setBackupHint:'La información se guarda solo en este aparato. Si se borran los datos del navegador o cambia de teléfono, se perderá. Guarde una copia en un lugar seguro.',
-  setExport:'Guardar copia de seguridad', setImport:'Restaurar desde una copia',
-  setNoticeTitle:'Aviso importante', setBack:'Volver al inicio', setAboutTitle:'Acerca de',
-  about:`Mind Companion v${APP_VERSION} · Funciona sin internet · Sin cuenta, sin rastreo, sin enviar datos.`,
-  frTitle:'Antes de empezar', frOk:'Entendido',
-  disclaimer:'Mind Companion es una ayuda personal para la memoria. No es un dispositivo médico y no da consejos médicos. No suena alarmas y no debe usarse como recordatorio de medicinas. Siga siempre las indicaciones de su médico o farmacéutico. En una emergencia, llame al 911. La información se guarda solo en este aparato; si se borran los datos del navegador, se perderá.',
-  exportOk:'Copia guardada.',
-  importAsk:'¿Restaurar esta copia? Todo lo que hay ahora en la app será reemplazado.',
-  importOk:'Copia restaurada.', importBad:'No se pudo leer ese archivo. Elija un archivo de copia de Mind Companion.',
-  exLbl:'Puede preguntarme cosas como:',
-  examples:['¿Qué día es hoy?','¿Tomé mis medicinas?','¿Quién es mi médico?'],
-  thinking:'Un momento…',
-  greetBack:'Buenos días.', greetBackA:'Buenas tardes.', greetBackE:'Buenas noches.',
-  howAreYou:'Estoy bien, gracias. ¿Cómo se siente usted hoy?',
-  thanks:'Con mucho gusto.',
-  notSure:'No estoy seguro de eso. Puede preguntarme qué día es, si tomó sus medicinas, o quién es su médico.',
-  setAiTitle:'Conversación',
-  setAiHint:'Con una dirección de conexión, la app puede conversar de verdad, no solo responder preguntas fijas.',
-  lbRelay:'Dirección de conexión', setTest:'Probar',
-  setAiNote:'Puede dejarlo vacío. La app seguirá respondiendo sobre el día, las medicinas, los contactos y las notas.',
-  relayOk:'Conectado. La conversación está activada.',
-  relayBad:'No se pudo conectar a esa dirección. Revísela e intente de nuevo.',
-  relayCleared:'Conexión eliminada. La app usará sus respuestas básicas.',
-  relaySaved:'Guardado.',
-  aiFail:'Ahora no me pude conectar, así que responderé con lo que está guardado aquí.',
-  /* mind wellness */
-  wTitle:'💚 Mi ánimo', wHint:'Un pequeño registro diario de cómo se siente. Puede mostrarlo en la consejería.',
-  wMoodTitle:'¿Cómo se siente hoy?',
-  moodLabels:['Muy bien','Bien','Más o menos','Un poco mal','Muy mal'],
-  wMoodSaved:'Gracias. Anoté cómo se siente hoy.',
-  wCheckTitle:'Revisión del ánimo', wCheckHint:'Dos preguntas cortas sobre las últimas dos semanas. No es un examen — no hay respuestas malas.',
-  wStart:'Responder las dos preguntas',
-  q1:'En las últimas dos semanas, ¿con qué frecuencia se ha sentido triste, deprimido o sin esperanza?',
-  q2:'En las últimas dos semanas, ¿con qué frecuencia ha sentido poco interés o placer en hacer las cosas?',
-  opts:['Nunca','Varios días','Más de la mitad de los días','Casi todos los días'],
-  wResultLow:'Gracias por responder. Su ánimo parece estar bien. Revisarlo de vez en cuando es una buena costumbre.',
-  wResultHigh:'Gracias por responder. Parece que su corazón ha estado pesado últimamente. Hablar con el consejero puede ayudar mucho — el contacto de consejería está abajo.',
-  wCrisis:'Si en algún momento se siente muy mal, puede llamar o mandar un texto al 988 a cualquier hora. Una persona amable lo escuchará. También hay atención en español.',
-  wDisclaim:'Esta revisión es una reflexión sencilla, no una prueba médica ni un diagnóstico. Si le preocupa su ánimo, hable con su consejero o su médico.',
-  wShareTitle:'Mostrar en la consejería', wShareHint:'Una página con sus ánimos y respuestas recientes, en letra grande.', wShareBtn:'Abrir la página de resumen',
-  wCounselorTitle:'Contacto de consejería', wCounselorHint:'La información de su consejero aparecerá aquí. Un familiar o el personal puede agregarla.',
-  wcName:'Nombre del consejero', wcOrg:'Organización / clínica', wcPhone:'Número de teléfono', wEditC:'Editar contacto de consejería',
-  noCounselorTxt:'El contacto de consejería todavía no está registrado.',
-  wSummaryTitle:'Mi ánimo reciente (últimas 4 semanas)',
-  wMoodSec:'Ánimo diario', wCheckSec:'Respuestas de la revisión',
-  checkScore:n=>`Resultado ${n} / 6`,
-  wNoData:'Todavía no hay registros.',
-  wClose:'Cerrar',
-  /* v1.5 orientation + caregiver */
-  pods:['mañana','día','tarde','noche'],
-  nowIs:p=>`Ahora es de ${p}.`,
-  myNameIs:n=>`Su nombre es ${n}.`,
-  myAddrIs:a=>`La dirección de su casa es ${a}.`,
-  noMeSaved:'Eso todavía no está escrito. Un familiar puede agregarlo en la pantalla de Ayuda.',
-  cgTitle:'Cuidador · personal del programa',
-  cgHint:'Herramientas para un familiar o el personal del programa. La persona que usa la app no necesita esta sección.',
-  simpleTitle:'Modo sencillo',
-  simpleHint:'Muestra solo Inicio, Medicinas, Contactos y Ayuda. No se borra nada — apáguelo para ver Notas y Ánimo otra vez.',
-  onWord:'Activado', offWord:'Apagado',
-  reportBtn:'Guardar informe de 4 semanas', csvBtn:'Guardar archivo de datos (CSV)',
-  rTitle:'Mind Companion — informe de 4 semanas',
-  rGenerated:'Creado',
-  rMedsSec:'Medicinas marcadas como tomadas',
-  rMedLine:(n,c)=>`${n}: marcada en ${c} de los últimos 28 días`,
-  rMedNote:'Las marcas las hace la persona en la app. Muestran uso de la app, no toma verificada.',
-  rFlags:'Puntos para conversar',
-  rFlagMood:'Ánimo bajo registrado en los 3 días registrados más recientes.',
-  rFlagCheck:'La última revisión del ánimo sugiere hablar con el consejero.',
-  rNoFlag:'Sin notas especiales.'
-},
-ja:{
-  htmlLang:'ja', voice:'ja-JP', sizeBtn:'あ',
-  greetM:'おはようございます', greetA:'こんにちは', greetE:'こんばんは',
-  micIdle:'押して話す', micLive:'聞いています… もう一度押すと終わります',
-  heardLbl:'聞いた内容', replyLbl:'答え', typeAsk:'文字で質問する',
-  todayMed:'今日のお薬', medsTitle:'💊 お薬', medsHint:'飲んだら大きい四角を押してください。',
-  addMed:'お薬を追加', mName:'お薬の名前', mTime:'飲む時間', mNote:'メモ(任意)',
-  medDisclaim:'この一覧は記録のためのものです。アラームは鳴りません。医師・薬剤師の指示に代わるものではありません。',
-  contactsTitle:'📞 連絡先', contactsHint:'緑のボタンを押すと、すぐに電話がかかります。',
-  addContact:'連絡先を追加', cName:'名前', cPhone:'電話番号', cRole:'関係 / 役割',
-  notesTitle:'📝 覚えのノート', notesHint:'物の置き場所や大事なことを書いておくと、声で聞いて探せます。',
-  voiceNote:'話して書く', addNote:'文字で書く', nTitle:'題名(聞くときの言葉)', nBody:'内容',
-  sosTitle:'🚑 助けを呼ぶ', sosHint:'緊急のときは大きいボタンを押してください。', call911:'911に電話',
-  sosSetHint:'家族として保存した連絡先がここに出ます。',
-  myInfo:'私の情報(救急隊員に見せてください)', editMe:'私の情報を直す',
-  meName:'名前', meAddr:'住所', meCond:'持病 · アレルギー', meBlood:'血液型',
-  save:'保存', cancel:'やめる', foot:'すべての情報はこの機器の中だけに保存されます。',
-  nav:['ホーム','お薬','連絡先','ノート','こころ','助け'],
-  times:{morning:'朝',noon:'昼',evening:'夜',night:'寝る前'},
-  roles:{family:'家族',doctor:'医師 · 病院',pharmacy:'薬局',repair:'修理 · サービス',friend:'友人 · 近所',other:'その他'},
-  ph:{medName:'例: 血圧の薬', medNote:'例: 食後30分',
-      cName:'例: 娘のゆき', cPhone:'210-555-0100',
-      nTitle:'例: パスポート', nBody:'例: 寝室のたんすの二段目',
-      meName:'氏名', meAddr:'自宅の住所',
-      meCond:'例: 高血圧、ペニシリンアレルギー', meBlood:'例: O+'},
-  noMeds:'お薬はまだ登録されていません。下から追加してください。',
-  noContacts:'連絡先はまだありません。',
-  noNotes:'まだ何も書かれていません。話して書いてみましょう。',
-  noSos:'まず家族の連絡先を追加してください。',
-  noMe:'まだ情報がありません。',
-  allTaken:'今日のお薬は全部飲みました。よくできました。',
-  medLeft:n=>`あと${n}つ残っています。`,
-  askPrompt:'何をお知りになりたいですか?',
-  notFound:'それはまだ分かりません。ノートに書いておくと、次から覚えています。',
-  sttNo:'このブラウザは音声入力に対応していません。ChromeかSafariをお使いになるか、下の「文字で質問する」を押してください。',
-  sttDenied:'マイクの使用が許可されていません。ブラウザの設定でマイクを許可してください。',
-  sttNoSpeech:'声が聞こえませんでした。ボタンを押して、もう一度お話しください。',
-  sttNet:'インターネット接続が必要です。接続を確認してください。',
-  confirmDel:'これを消しますか?',
-  noteSaved:'書きました。', savedShort:'保存しました。',
-  needName:'名前を書いてください。', needPhone:'電話番号を書いてください。',
-  medTakenSay:n=>`${n}を飲んだことにしました。`,
-  answerMedYes:'今日のお薬は全部飲みました。',
-  answerMedNo:list=>`まだ${list}を飲んでいません。`,
-  answerCall:(n,p)=>`${n}、${p}です。連絡先の画面で緑のボタンを押すと電話がかかります。`,
-  today:'今日は',
-  setTitle:'⚙️ 設定', setHint:'ふつうは最初にご家族が一度だけ設定します。',
-  setTextTitle:'文字の大きさ', setTextBtn:'文字を大きくする',
-  setLangTitle:'言語', setLangNote:'言語を変えると、聞き取りと読み上げの声も変わります。',
-  setBackupTitle:'バックアップと復元',
-  setBackupHint:'情報はこの機器だけに保存されます。ブラウザのデータを消したり機種を替えると消えます。バックアップファイルを安全な場所に保管してください。',
-  setExport:'バックアップを保存', setImport:'バックアップから復元',
-  setNoticeTitle:'大切なお知らせ', setBack:'ホームへ', setAboutTitle:'このアプリについて',
-  about:`Mind Companion v${APP_VERSION} · オフラインで動作 · アカウント不要、追跡なし、外部送信なし。`,
-  frTitle:'はじめる前に', frOk:'分かりました',
-  disclaimer:'Mind Companionは記憶を助ける道具です。医療機器ではなく、医学的な助言もしません。アラームは鳴らないため、服薬の通知として頼らないでください。必ず医師・薬剤師の指示に従ってください。緊急のときは911にお電話ください。情報はこの機器だけに保存され、ブラウザのデータを消すと失われます。',
-  exportOk:'バックアップを保存しました。',
-  importAsk:'このバックアップで復元しますか?今アプリにある内容はすべて置き換わります。',
-  importOk:'復元しました。', importBad:'ファイルを読めませんでした。Mind Companionのバックアップファイルを選んでください。',
-  exLbl:'こんなことを聞けます:',
-  examples:['今日は何日?','薬は飲んだ?','私のお医者さんは誰?'],
-  thinking:'少々お待ちください…',
-  greetBack:'おはようございます。', greetBackA:'こんにちは。', greetBackE:'こんばんは。',
-  howAreYou:'私は元気です。今日のご気分はいかがですか?',
-  thanks:'どういたしまして。',
-  notSure:'それはよく分かりません。今日の日付、薬を飲んだか、お医者さんが誰かを聞いてみてください。',
-  setAiTitle:'会話',
-  setAiHint:'接続アドレスを入れると、決まった質問だけでなく、本当の会話ができます。',
-  lbRelay:'接続アドレス', setTest:'確認',
-  setAiNote:'空のままでも使えます。日付、薬、連絡先、ノートへの答えはそのままできます。',
-  relayOk:'つながりました。会話機能がオンになりました。',
-  relayBad:'そのアドレスにつながりません。確認してもう一度お試しください。',
-  relayCleared:'接続を外しました。基本の答えだけを使います。',
-  relaySaved:'保存しました。',
-  aiFail:'今はつながらないので、保存してある内容だけでお答えします。',
-  /* mind wellness */
-  wTitle:'💚 こころ', wHint:'今日の気分を簡単に記録します。相談のときに見せることができます。',
-  wMoodTitle:'今日のご気分はいかがですか?',
-  moodLabels:['とても良い','良い','ふつう','少しつらい','とてもつらい'],
-  wMoodSaved:'ありがとうございます。今日の気分を書き留めました。',
-  wCheckTitle:'こころの点検', wCheckHint:'この2週間についての短い質問が2つです。テストではありませんので、気楽にお答えください。',
-  wStart:'2つの質問に答える',
-  q1:'この2週間、気分が沈む、憂うつ、絶望的だと感じることが、どのくらいありましたか?',
-  q2:'この2週間、物事に興味や楽しみを感じられないことが、どのくらいありましたか?',
-  opts:['全くない','数日あった','半分以上の日','ほとんど毎日'],
-  wResultLow:'お答えいただき、ありがとうございます。こころは比較的お元気のようです。ときどきこうして振り返るのは良い習慣です。',
-  wResultHigh:'お答えいただき、ありがとうございます。このごろ、こころが重いご様子です。相談の先生とお話しすると、きっと助けになります。下の相談連絡先をご覧ください。',
-  wCrisis:'とてもつらいときは、昼夜いつでも988に電話やメッセージができます。やさしい人が話を聞いてくれます。通訳もあります。',
-  wDisclaim:'この点検は簡単な振り返りであり、医学的な検査や診断ではありません。ご気分が心配なときは、相談の先生や医師にお話しください。',
-  wShareTitle:'相談のときに見せる', wShareHint:'最近の気分と答えを、大きな文字で1つの画面にまとめます。', wShareBtn:'まとめ画面を開く',
-  wCounselorTitle:'相談の連絡先', wCounselorHint:'相談の先生の情報がここに表示されます。ご家族や担当の方が入れます。',
-  wcName:'相談の先生のお名前', wcOrg:'所属 / 機関', wcPhone:'電話番号', wEditC:'相談連絡先を入力',
-  noCounselorTxt:'相談の連絡先はまだ登録されていません。',
-  wSummaryTitle:'最近のわたしのこころ(この4週間)',
-  wMoodSec:'毎日の気分', wCheckSec:'こころの点検の答え',
-  checkScore:n=>`点検の結果 ${n} / 6`,
-  wNoData:'まだ記録がありません。',
-  wClose:'閉じる',
-  /* v1.5 orientation + caregiver */
-  pods:['朝','昼','夕方','夜'],
-  nowIs:p=>`今は${p}です。`,
-  myNameIs:n=>`お名前は${n}です。`,
-  myAddrIs:a=>`ご自宅の住所は${a}です。`,
-  noMeSaved:'まだ書かれていません。助けの画面でご家族が入れられます。',
-  cgTitle:'介護者 · 担当者',
-  cgHint:'ご家族やプログラム担当者のための道具です。ご本人が使う必要はありません。',
-  simpleTitle:'かんたんモード',
-  simpleHint:'ホーム・お薬・連絡先・助けだけを表示します。何も消えません。オフにするとノートとこころが戻ります。',
-  onWord:'オン', offWord:'オフ',
-  reportBtn:'4週間の報告書を保存', csvBtn:'データファイルを保存 (CSV)',
-  rTitle:'Mind Companion — 4週間の報告書',
-  rGenerated:'作成日',
-  rMedsSec:'飲んだと記録したお薬',
-  rMedLine:(n,c)=>`${n}: この28日間で${c}日記録`,
-  rMedNote:'ご本人がアプリで押した記録であり、実際の服用を確認するものではありません。',
-  rFlags:'相談の参考',
-  rFlagMood:'直近に記録された3日続けて、つらい気分が記録されています。',
-  rFlagCheck:'最近のこころの点検では、相談の先生と話すことをおすすめします。',
-  rNoFlag:'特記事項なし。'
 }};
 const t = () => T[DB.lang] || T.en;
 
@@ -1105,18 +689,16 @@ function askByTyping(){
 function norm(s){ return (s||'').toLowerCase().replace(/[.,!?~'"()\-]/g,' ').replace(/\s+/g,' ').trim(); }
 
 const KW = {
-  medStatus:['약','먹었','복용','medicine','medication','pill','took my','take my','medicina','medicamento','pastilla','tomé','tome mis','薬','くすり','飲んだ','のんだ'],
-  timeDate:['오늘','며칠','날짜','무슨 요일','몇 시','시간','what day','what time','date','today','qué día','que dia','fecha','qué hora','que hora','hoy','今日','何日','何時','曜日','なんにち'],
-  call:['전화','연락','call','phone','number','llamar','llama','teléfono','telefono','número','numero','電話','番号'],
-  doctor:['의사','병원','주치의','doctor','clinic','physician','médico','medico','clínica','clinica','医者','病院','お医者','主治医'],
-  pharmacy:['약국','pharmacy','pharmacist','farmacia','薬局'],
-  repair:['수리','고장','기사','repair','fix','plumber','technician','softener','reparar','arreglar','técnico','tecnico','修理','故障'],
-  family:['딸','아들','가족','자식','daughter','son','family','kid','child','hija','hijo','familia','娘','息子','家族','子ども'],
-  greet:['안녕','좋은 아침','좋은 저녁','hello','hi','good morning','good afternoon','good evening','hey','hola','buenos días','buenos dias','buenas tardes','buenas noches','こんにちは','おはよう','こんばんは'],
-  howAreYou:['잘 지내','어떻게 지내','어때','how are you','how do you do','are you ok','cómo estás','como estas','cómo está','como esta','元気','げんき'],
-  thanks:['고마','감사','thank','thanks','appreciate','gracias','ありがとう'],
-  whoAmI:['내 이름','제 이름','who am i','my name','what is my name','mi nombre','cómo me llamo','como me llamo','私の名前','わたしの名前'],
-  whereAmI:['여기가 어디','내 주소','우리 집 주소','where am i','my address','where do i live','dónde estoy','donde estoy','mi dirección','mi direccion','dónde vivo','donde vivo','ここはどこ','私の住所','家の住所']
+  medStatus:['약','먹었','복용','medicine','medication','pill','took my','take my'],
+  timeDate:['오늘','며칠','날짜','무슨 요일','몇 시','시간','what day','what time','date','today'],
+  call:['전화','연락','call','phone','number'],
+  doctor:['의사','병원','주치의','doctor','clinic','physician'],
+  pharmacy:['약국','pharmacy','pharmacist'],
+  repair:['수리','고장','기사','repair','fix','plumber','technician','softener'],
+  family:['딸','아들','가족','자식','daughter','son','family','kid','child'],
+  greet:['안녕','좋은 아침','좋은 저녁','hello','hi','good morning','good afternoon','good evening','hey'],
+  howAreYou:['잘 지내','어떻게 지내','어때','how are you','how do you do','are you ok'],
+  thanks:['고마','감사','thank','thanks','appreciate']
 };
 const hit = (q,arr) => arr.some(k=>q.includes(norm(k)));
 
@@ -1165,9 +747,6 @@ function localAnswer(q){
     const left = todaysMeds().filter(m=>!isTaken(m.id));
     return left.length===0 ? L.answerMedYes : L.answerMedNo(left.map(m=>m.name).join(', '));
   }
-
-  if (hit(q,KW.whoAmI))   return DB.me.name ? L.myNameIs(DB.me.name) : L.noMeSaved;
-  if (hit(q,KW.whereAmI)) return DB.me.addr ? L.myAddrIs(DB.me.addr) : L.noMeSaved;
 
   if (hit(q,KW.doctor))   return contactAnswer('doctor');
   if (hit(q,KW.pharmacy)) return contactAnswer('pharmacy');
@@ -1222,22 +801,14 @@ function savedContext(){
     lines.push('No memory notes have been saved in the app.');
   }
 
-  const cs = DB.counselor || {};
-  if (cs.name || cs.phone){
-    lines.push(`Counseling contact saved in the app: ${cs.name||''}${cs.org?' ('+cs.org+')':''}${cs.phone?' — '+cs.phone:''}`);
-  }
-  const md = DB.mood[todayKey()];
-  if (md && L.moodLabels) lines.push(`Mood the person recorded today: ${L.moodLabels[md.v]}`);
-
   return lines.join('\n');
 }
 
 async function askAI(userText){
   const L = t();
-  const LANG_NAME = {en:'English', ko:'Korean', es:'Spanish', ja:'Japanese'};
-  const system = `${L.sysPrompt || T.en.sysPrompt}
+  const system = `${L.sysPrompt}
 
-Reply in ${LANG_NAME[DB.lang] || 'English'}.
+Reply in ${DB.lang==='ko' ? 'Korean' : 'English'}.
 
 --- SAVED INFORMATION ---
 ${savedContext()}
@@ -1320,8 +891,6 @@ function render(){
   document.getElementById('clock').textContent = timeString();
   document.getElementById('datestr').textContent = dateString();
   const h = new Date().getHours();
-  const pod = h>=5&&h<11 ? 0 : (h<17 ? 1 : (h<21 ? 2 : 3));
-  document.getElementById('podLine').textContent = L.nowIs(L.pods[pod]);
   const g = h<12 ? L.greetM : (h<18 ? L.greetA : L.greetE);
   document.getElementById('greeting').textContent = g + (DB.me.name ? ', '+DB.me.name : '');
   const left = todaysMeds().filter(m=>!isTaken(m.id)).length;
@@ -1367,7 +936,6 @@ function render(){
   const ru = document.getElementById('relayUrl');
   if (ru && document.activeElement !== ru) ru.value = DB.relayUrl || '';
 
-  renderWellness();
   applyLangText();
 }
 
@@ -1377,12 +945,11 @@ function askExample(q){
   handleQuestion(q);
 }
 
-const LOC = {en:'en-US', ko:'ko-KR', es:'es-US', ja:'ja-JP'};
 function timeString(){
-  return new Date().toLocaleTimeString(LOC[DB.lang]||'en-US',{hour:'numeric',minute:'2-digit'});
+  return new Date().toLocaleTimeString(t().htmlLang==='ko'?'ko-KR':'en-US',{hour:'numeric',minute:'2-digit'});
 }
 function dateString(){
-  return new Date().toLocaleDateString(LOC[DB.lang]||'en-US',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  return new Date().toLocaleDateString(t().htmlLang==='ko'?'ko-KR':'en-US',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 }
 
 function applyLangText(){
@@ -1417,18 +984,6 @@ function applyLangText(){
   set('setNoticeTitle',L.setNoticeTitle); set('setBack',L.setBack); set('setAboutTitle',L.setAboutTitle);
   set('aboutText',L.about); set('disclaimerText',L.disclaimer);
   set('frTitle',L.frTitle); set('frText',L.disclaimer); set('frOk',L.frOk);
-  /* mind wellness */
-  set('wTitle',L.wTitle); set('wHint',L.wHint); set('wMoodTitle',L.wMoodTitle);
-  set('wCheckTitle',L.wCheckTitle); set('wCheckHint',L.wCheckHint); set('wStartLbl',L.wStart);
-  set('wDisclaim',L.wDisclaim);
-  set('wShareTitle',L.wShareTitle); set('wShareHint',L.wShareHint); set('wShareBtnLbl',L.wShareBtn);
-  set('wCounselorTitle',L.wCounselorTitle); set('wCounselorHint',L.wCounselorHint); set('wEditCLbl',L.wEditC);
-  set('lbWcName',L.wcName); set('lbWcOrg',L.wcOrg); set('lbWcPhone',L.wcPhone);
-  set('sumCloseLbl',L.wClose);
-  /* caregiver */
-  set('cgTitle',L.cgTitle); set('cgHint',L.cgHint); set('simpleHintTxt',L.simpleHint);
-  set('reportBtnLbl',L.reportBtn); set('csvBtnLbl',L.csvBtn);
-  set('simpleBtnLbl', L.simpleTitle + ': ' + (DB.simpleMode ? L.onWord : L.offWord));
 
   ph('medName',L.ph.medName); ph('medNote',L.ph.medNote);
   ph('cName',L.ph.cName); ph('cPhone',L.ph.cPhone);
@@ -1442,11 +997,8 @@ function applyLangText(){
   [...document.getElementById('medTime').options].forEach(o=>o.textContent = L.times[o.value]);
   [...document.getElementById('cRole').options].forEach(o=>o.textContent = L.roles[o.value]);
 
-  const LB = {en:'langEn', ko:'langKo', es:'langEs', ja:'langJa'};
-  Object.keys(LB).forEach(k=>{
-    const b = document.getElementById(LB[k]);
-    if (b) b.style.borderColor = DB.lang===k ? 'var(--blue)' : 'var(--line)';
-  });
+  document.getElementById('langEn').style.borderColor = DB.lang==='en' ? 'var(--blue)' : 'var(--line)';
+  document.getElementById('langKo').style.borderColor = DB.lang==='ko' ? 'var(--blue)' : 'var(--line)';
 
   updateSizeBtn();
 }
@@ -1457,109 +1009,11 @@ function updateSizeBtn(){
   document.getElementById('sizeBtn').textContent = t().sizeBtn + '+'.repeat(i+1);
 }
 
-/* ---------------- mind wellness (v1.4) ---------------- */
-const MOOD_EMOJI = ['😄','🙂','😐','😞','😢'];
-let wq = null; /* mind-check state; never saved mid-flow */
-
-function renderWellness(){
-  const L = t();
-  const todayMood = (DB.mood||{})[todayKey()];
-  document.getElementById('moodRow').innerHTML = MOOD_EMOJI.map((em,i)=>`
-    <button class="moodbtn ${todayMood && todayMood.v===i ? 'on':''}" onclick="saveMood(${i})">
-      <span class="em">${em}</span><span>${esc(L.moodLabels[i])}</span>
-    </button>`).join('');
-  document.getElementById('moodStatus').textContent = todayMood ? L.wMoodSaved : '';
-
-  const c = DB.counselor || {};
-  document.getElementById('counselorView').innerHTML = (c.name || c.phone) ? `
-    <div class="item">
-      <div class="txt"><strong>${esc(c.name||'')}</strong><span>${esc(c.org||'')}${c.phone?' · '+esc(c.phone):''}</span></div>
-      ${c.phone ? `<a href="tel:${encodeURIComponent(c.phone)}"><button class="tap call" aria-label="call counselor">📞</button></a>` : ''}
-    </div>` : `<div class="empty">${L.noCounselorTxt}</div>`;
-
-  if (!wq) document.getElementById('wCheckArea').innerHTML = '';
-}
-
-async function saveMood(i){
-  DB.mood = DB.mood || {};
-  DB.mood[todayKey()] = { v:i, at:Date.now() };
-  await save(); renderWellness();
-  say(t().wMoodSaved);
-}
-
-function startCheck(){
-  wq = { step:1, s1:0 };
-  drawCheck();
-}
-
-function drawCheck(){
-  const L = t();
-  const q = wq.step===1 ? L.q1 : L.q2;
-  document.getElementById('wCheckArea').innerHTML = `
-    <div class="qtext">${esc(q)}</div>
-    ${L.opts.map((o,i)=>`<button class="optbtn" onclick="answerCheck(${i})">${esc(o)}</button>`).join('')}`;
-  say(q);
-}
-
-async function answerCheck(v){
-  const L = t();
-  if (!wq) return;
-  if (wq.step===1){ wq.s1 = v; wq.step = 2; drawCheck(); return; }
-  const total = wq.s1 + v;
-  DB.checks = DB.checks || [];
-  DB.checks.push({ at:Date.now(), s1:wq.s1, s2:v });
-  if (DB.checks.length > 24) DB.checks = DB.checks.slice(-24);
-  wq = null;
-  await save();
-  const high = total >= 3;
-  const msg = high ? L.wResultHigh : L.wResultLow;
-  document.getElementById('wCheckArea').innerHTML = `
-    <div class="transcript answer" style="margin-top:14px">${esc(msg)}</div>
-    ${high ? `<div class="warn" style="margin-top:10px">${esc(L.wCrisis)} <a href="tel:988" style="font-weight:800">988</a></div>` : ''}`;
-  say(high ? msg + ' ' + L.wCrisis : msg);
-}
-
-function openSummary(){
-  const L = t();
-  const loc = LOC[DB.lang] || 'en-US';
-  document.getElementById('sumTitle').textContent = L.wSummaryTitle;
-  document.getElementById('sumCloseLbl').textContent = L.wClose;
-
-  const days = [];
-  for (let d=0; d<28; d++){
-    const dt = new Date(Date.now() - d*86400000);
-    const k = dt.toISOString().slice(0,10);
-    const m = (DB.mood||{})[k];
-    if (m) days.push(`<div class="item"><div class="txt"><strong>${dt.toLocaleDateString(loc,{month:'short',day:'numeric',weekday:'short'})}</strong><span style="font-size:1.05rem">${MOOD_EMOJI[m.v]} ${esc(L.moodLabels[m.v])}</span></div></div>`);
-  }
-  const checks = (DB.checks||[]).slice(-10).reverse().map(c=>{
-    const total = (c.s1||0)+(c.s2||0);
-    return `<div class="item"><div class="txt"><strong>${new Date(c.at).toLocaleDateString(loc,{month:'short',day:'numeric'})}</strong><span>${esc(L.checkScore(total))}</span></div></div>`;
-  });
-
-  document.getElementById('sumBody').innerHTML = `
-    <h3 style="margin:12px 0 8px">${esc(L.wMoodSec)}</h3>
-    ${days.length ? days.join('') : `<div class="empty">${L.wNoData}</div>`}
-    <h3 style="margin:16px 0 8px">${esc(L.wCheckSec)}</h3>
-    ${checks.length ? checks.join('') : `<div class="empty">${L.wNoData}</div>`}
-    <p class="tiny" style="margin-top:12px">${esc(L.wDisclaim)}</p>`;
-  document.getElementById('sumModal').classList.add('on');
-}
-
-async function saveCounselor(){
-  DB.counselor = {
-    name:document.getElementById('wcName').value.trim(),
-    org:document.getElementById('wcOrg').value.trim(),
-    phone:document.getElementById('wcPhone').value.trim()
-  };
-  await save(); showForm(null); render(); say(t().savedShort);
-}
-
 /* ---------------- actions ---------------- */
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
 function showForm(which){
-  ['med','contact','note','me','wc'].forEach(f=>{
+  ['med','contact','note','me'].forEach(f=>{
     const el = document.getElementById(f+'Form');
     if (el) el.style.display = (f===which) ? 'block' : 'none';
   });
@@ -1568,12 +1022,6 @@ function showForm(which){
     document.getElementById('meAddr').value = DB.me.addr||'';
     document.getElementById('meCond').value = DB.me.cond||'';
     document.getElementById('meBlood').value = DB.me.blood||'';
-  }
-  if (which==='wc'){
-    const c = DB.counselor||{};
-    document.getElementById('wcName').value = c.name||'';
-    document.getElementById('wcOrg').value = c.org||'';
-    document.getElementById('wcPhone').value = c.phone||'';
   }
 }
 
@@ -1630,9 +1078,7 @@ async function delItem(kind,id){
   await save(); render();
 }
 
-let curView = 'home';
 function go(v){
-  curView = v;
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
   document.getElementById('v-'+v).classList.add('on');
   document.querySelectorAll('.navbtn').forEach(b=>{
@@ -1695,109 +1141,6 @@ async function testRelay(){
   }
 }
 
-/* ---------------- caregiver tools (v1.5) ---------------- */
-async function toggleSimple(){
-  DB.simpleMode = !DB.simpleMode;
-  document.body.classList.toggle('simple', DB.simpleMode);
-  if (DB.simpleMode && (curView==='notes' || curView==='well')) go('home');
-  await save();
-  applyLangText();
-}
-
-function last28Keys(){
-  const keys = [];
-  for (let d=0; d<28; d++){
-    keys.push(new Date(Date.now()-d*86400000).toISOString().slice(0,10));
-  }
-  return keys;
-}
-
-function reportFlags(){
-  const L = t();
-  const flags = [];
-  const moodDays = Object.keys(DB.mood||{}).sort().slice(-3);
-  if (moodDays.length===3 && moodDays.every(k=>DB.mood[k].v>=3)) flags.push(L.rFlagMood);
-  const lastCheck = (DB.checks||[]).slice(-1)[0];
-  if (lastCheck && ((lastCheck.s1||0)+(lastCheck.s2||0))>=3) flags.push(L.rFlagCheck);
-  return flags;
-}
-
-function downloadFile(name, mime, content){
-  const blob = new Blob([content],{type:mime});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-
-function exportReport(){
-  const L = t();
-  const loc = LOC[DB.lang] || 'en-US';
-  const keys = last28Keys();
-  const esc2 = esc;
-
-  const medRows = DB.meds.map(m=>{
-    const c = keys.filter(k=>(DB.taken[k]||{})[m.id]).length;
-    return `<li>${esc2(L.rMedLine(m.name,c))}</li>`;
-  }).join('') || `<li>${esc2(L.noMeds)}</li>`;
-
-  const moodRows = keys.filter(k=>(DB.mood||{})[k]).map(k=>{
-    const m = DB.mood[k];
-    return `<li>${new Date(k+'T12:00:00').toLocaleDateString(loc,{month:'short',day:'numeric',weekday:'short'})} — ${MOOD_EMOJI[m.v]} ${esc2(L.moodLabels[m.v])}</li>`;
-  }).join('') || `<li>${esc2(L.wNoData)}</li>`;
-
-  const checkRows = (DB.checks||[]).slice(-10).reverse().map(c=>{
-    const total=(c.s1||0)+(c.s2||0);
-    return `<li>${new Date(c.at).toLocaleDateString(loc,{month:'short',day:'numeric'})} — ${esc2(L.checkScore(total))}</li>`;
-  }).join('') || `<li>${esc2(L.wNoData)}</li>`;
-
-  const flags = reportFlags();
-  const flagRows = flags.length ? flags.map(f=>`<li><b>${esc2(f)}</b></li>`).join('') : `<li>${esc2(L.rNoFlag)}</li>`;
-
-  const cs = DB.counselor||{};
-  const csLine = (cs.name||cs.phone) ? `<p>${esc2(L.wCounselorTitle)}: ${esc2(cs.name||'')}${cs.org?' ('+esc2(cs.org)+')':''}${cs.phone?' · '+esc2(cs.phone):''}</p>` : '';
-
-  const html = `<!DOCTYPE html><html lang="${L.htmlLang}"><head><meta charset="UTF-8">
-<title>${esc2(L.rTitle)}</title>
-<style>body{font-family:-apple-system,'Segoe UI','Malgun Gothic','Hiragino Sans',sans-serif;max-width:680px;margin:24px auto;padding:0 16px;font-size:17px;line-height:1.6;color:#16202E;}
-h1{font-size:1.4rem;}h2{font-size:1.1rem;margin-top:22px;border-bottom:2px solid #D3DDE8;padding-bottom:4px;}
-ul{padding-left:20px;}small{color:#4A5A6E;}</style></head><body>
-<h1>${esc2(L.rTitle)}</h1>
-<p>${DB.me.name?esc2(L.meName)+': <b>'+esc2(DB.me.name)+'</b> · ':''}${esc2(L.rGenerated)}: ${new Date().toLocaleDateString(loc,{year:'numeric',month:'long',day:'numeric'})}</p>
-${csLine}
-<h2>${esc2(L.rFlags)}</h2><ul>${flagRows}</ul>
-<h2>${esc2(L.rMedsSec)}</h2><ul>${medRows}</ul><small>${esc2(L.rMedNote)}</small>
-<h2>${esc2(L.wMoodSec)}</h2><ul>${moodRows}</ul>
-<h2>${esc2(L.wCheckSec)}</h2><ul>${checkRows}</ul>
-<hr><small>${esc2(L.wDisclaim)}</small>
-</body></html>`;
-
-  downloadFile(`mind-companion-report-${todayKey()}.html`,'text/html;charset=utf-8',html);
-  say(L.savedShort);
-}
-
-function exportCsv(){
-  const L = t();
-  const rows = [['date','type','item','value']];
-  Object.keys(DB.mood||{}).sort().forEach(k=>{
-    rows.push([k,'mood',String(DB.mood[k].v), L.moodLabels[DB.mood[k].v]]);
-  });
-  (DB.checks||[]).forEach(c=>{
-    rows.push([new Date(c.at).toISOString().slice(0,10),'mind_check',`${c.s1||0}+${c.s2||0}`,String((c.s1||0)+(c.s2||0))]);
-  });
-  Object.keys(DB.taken||{}).sort().forEach(k=>{
-    Object.keys(DB.taken[k]).forEach(id=>{
-      if (!DB.taken[k][id]) return;
-      const m = DB.meds.find(x=>x.id===id);
-      rows.push([k,'medicine_marked', m?m.name:id,'1']);
-    });
-  });
-  const csv = '\uFEFF' + rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-  downloadFile(`mind-companion-data-${todayKey()}.csv`,'text/csv;charset=utf-8',csv);
-  say(L.savedShort);
-}
-
 /* ---------------- backup / restore ---------------- */
 function exportData(){
   const payload = { app:'mind-companion', version:APP_VERSION, exported:new Date().toISOString(), data:DB };
@@ -1821,7 +1164,7 @@ function importData(ev){
       const d = (p && p.app==='mind-companion' && p.data) ? p.data : null;
       if (!d || !Array.isArray(d.meds)) throw new Error('bad file');
       if (!confirm(t().importAsk)) return;
-      DB = Object.assign({meds:[],contacts:[],notes:[],taken:{},me:{},lang:'en',scale:1,agreed:true,mood:{},checks:[],counselor:{},simpleMode:false}, d);
+      DB = Object.assign({meds:[],contacts:[],notes:[],taken:{},me:{},lang:'en',scale:1,agreed:true}, d);
       document.documentElement.style.setProperty('--scale',DB.scale||1);
       await save(); render();
       alert(t().importOk);
@@ -1841,7 +1184,6 @@ async function acceptNotice(){
 /* ---------------- boot ---------------- */
 (async function(){
   await load();
-  document.body.classList.toggle('simple', !!DB.simpleMode);
   render();
   if (!DB.agreed) document.getElementById('firstRun').classList.add('on');
   setInterval(()=>{ document.getElementById('clock').textContent = timeString(); },10000);
