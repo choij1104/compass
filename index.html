@@ -1158,7 +1158,9 @@ function exportData(){
   if(db.entries.length===0) lines.push('(no records)');
   const blob=new Blob([lines.join('\n')],{type:'text/plain'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='compass-record-'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
+  const ld=new Date();
+  const lds=ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0');
+  a.download='compass-record-'+lds+'.txt'; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   toast('Exported');
 }
@@ -1182,8 +1184,9 @@ async function confirmWipe(){
     }
   }catch(e){}
   db=load();
-  document.getElementById('quickExit').classList.toggle('show', db.settings.quickExit);
-  closeModal(); toast('All data erased'); goHome(); refreshHome();
+  closeModal(); goHome(); refreshHome();
+  lockNow(); // back to the lock screen: with no PIN stored this starts fresh PIN setup
+  toast('All data erased');
 }
 
 /* ---------- utils ---------- */
