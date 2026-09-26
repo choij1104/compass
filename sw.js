@@ -2,7 +2,7 @@
    Caches only the app itself. No records are ever cached: everything the person
    writes lives in localStorage, which this worker never touches.
    IMPORTANT: bump CACHE on every release, or devices keep serving the old app. */
-const CACHE = 'compass-v1.0';
+const CACHE = 'compass-v1.1';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
