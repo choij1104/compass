@@ -60,13 +60,13 @@
     backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);
     border-bottom:1px solid var(--line)}
   .topbar-in{max-width:680px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
-  .tb-back{font-size:22px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  .tb-back{font-size:22px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
     border-radius:10px;color:var(--sea-deep)}
   .tb-back:active{background:var(--sea-soft)}
   .tb-title{font-family:var(--serif);font-size:18px;font-weight:600}
   .tb-spacer{flex:1}
   .tb-lock{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:5px;
-    padding:6px 11px;border:1px solid var(--line);border-radius:999px}
+    padding:12px 16px;border:1px solid var(--line);border-radius:999px}
   .tb-lock:active{background:var(--paper-2)}
 
   /* ---------- Home ---------- */
@@ -98,7 +98,8 @@
   .pattern-alert svg{width:22px;height:22px;flex:none;color:var(--amber);margin-top:1px}
   .pattern-alert h4{font-family:var(--serif);font-size:15.5px;margin:0 0 3px}
   .pattern-alert p{font-size:13px;color:#7a5a34;margin:0}
-  .pattern-alert button{margin-top:9px;font-size:12.5px;color:var(--amber);font-weight:700;text-decoration:underline}
+  .pattern-alert button{margin-top:9px;font-size:12.5px;color:var(--amber);font-weight:700;text-decoration:underline;
+    min-height:44px;display:inline-flex;align-items:center}
 
   /* ---------- Generic content ---------- */
   .content{padding:22px 0 40px}
@@ -170,7 +171,7 @@
     box-shadow:0 0 0 3px var(--sea-soft)}
   .field textarea{min-height:120px;resize:vertical;line-height:1.5}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;font-size:13px;
+  .chip{padding:12px 16px;border:1.5px solid var(--line);border-radius:999px;font-size:13px;
     background:var(--white);transition:.12s;color:var(--ink)}
   .chip:active{transform:scale(.97)}
   .chip.on{background:var(--sea);border-color:var(--sea);color:#fff}
@@ -191,7 +192,7 @@
   .entry .emeta{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
   .entry .emeta span{font-size:11.5px;color:var(--muted);background:var(--paper-2);padding:2px 8px;border-radius:6px}
   .entry-actions{display:flex;gap:8px;margin-top:11px}
-  .entry-actions button{font-size:12.5px;color:var(--muted);padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+  .entry-actions button{font-size:12.5px;color:var(--muted);padding:10px 14px;border-radius:8px;border:1px solid var(--line)}
   .entry-actions button:active{background:var(--paper-2)}
 
   .empty{text-align:center;padding:40px 20px;color:var(--muted)}
@@ -259,7 +260,7 @@
   .footer-note{text-align:center;font-size:11.5px;color:var(--muted-2);padding:24px 20px 34px;line-height:1.6}
   .footer-note b{color:var(--muted)}
   .quick-exit{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;
-    background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:11px 15px;border-radius:999px;
+    background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:13px 16px;border-radius:999px;
     box-shadow:var(--shadow-lg);display:none;align-items:center;gap:6px}
   .quick-exit.show{display:flex}
 </style>
@@ -459,7 +460,7 @@ function buildKeys(){
     const b=document.createElement('button');
     if(k==='x'){ b.className='key fn'; b.textContent='⌫'; b.onclick=()=>{pinBuf=pinBuf.slice(0,-1);drawDots();}; }
     else if(k==='ok'){ b.className='key fn'; b.textContent='OK'; b.onclick=submitPin; }
-    else { b.className='key'; b.textContent=k; b.onclick=()=>{ if(pinBuf.length<8){pinBuf+=k;drawDots(); if(pinBuf.length>=4&&db.pin&&pinMode==='enter')setTimeout(submitPin,120);} }; }
+    else { b.className='key'; b.textContent=k; b.onclick=()=>{ if(pinBuf.length<8){pinBuf+=k;drawDots(); if(pinMode==='enter'&&db.pin&&pinBuf.length===db.pin.length)setTimeout(submitPin,120);} }; }
     host.appendChild(b);
   });
 }
@@ -494,8 +495,14 @@ function lockNow(){
   const l=document.getElementById('lock'); l.classList.add('active');
   document.getElementById('quickExit').classList.remove('show');
   pinBuf=''; pinMode='enter';
-  document.getElementById('lockTitle').textContent='Compass';
-  document.getElementById('lockSub').textContent='Enter your PIN to open';
+  if(!db.pin){ // nothing set yet (e.g. right after "erase everything"): start fresh PIN setup instead of a dead end
+    pinMode='set';
+    document.getElementById('lockTitle').textContent='Set a PIN';
+    document.getElementById('lockSub').textContent='Choose 4–8 digits to protect your records';
+  } else {
+    document.getElementById('lockTitle').textContent='Compass';
+    document.getElementById('lockSub').textContent='Enter your PIN to open';
+  }
   drawDots();
 }
 function openApp(){
@@ -774,8 +781,9 @@ function editEntry(id, seedObj){
   const e = seedObj || Object.assign({}, db.entries.find(x=>x.id===id));
   if(!e) return;
   const dt=new Date(e.when);
-  const dateStr=dt.toISOString().slice(0,10);
-  const timeStr=dt.toTimeString().slice(0,5);
+  const pad=n=>String(n).padStart(2,'0');
+  const dateStr=dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+  const timeStr=pad(dt.getHours())+':'+pad(dt.getMinutes());
   const feelChips=['Frozen','Sick / knot in stomach','Wanted to leave','Ashamed','Angry','Confused','Scared','Numb'];
   const host=document.getElementById('entryHost');
   host.innerHTML=`
@@ -1173,7 +1181,9 @@ async function confirmWipe(){
       await Promise.all(regs.map(r => r.unregister()));
     }
   }catch(e){}
-  db=load(); closeModal(); toast('All data erased'); goHome(); refreshHome();
+  db=load();
+  document.getElementById('quickExit').classList.toggle('show', db.settings.quickExit);
+  closeModal(); toast('All data erased'); goHome(); refreshHome();
 }
 
 /* ---------- utils ---------- */
@@ -1185,7 +1195,7 @@ function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt
 function escapeAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
 /* ---------- boot ---------- */
-const APP_VERSION = '1.0';
+const APP_VERSION = '1.1';
 
 function boot(){
   buildKeys();
